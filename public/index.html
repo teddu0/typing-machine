@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#fff8e8">
+    <title>Клавишки — учимся печатать</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <button class="brand" id="home-button" type="button" aria-label="На главную">
+        <span class="brand-mark">А</span>
+        <span>Клавишки</span>
+      </button>
+      <div class="total-stars" aria-label="Собрано звёзд">
+        <span>★</span>
+        <strong id="total-stars">0</strong>
+      </div>
+    </header>
+
+    <main>
+      <section id="map-screen" class="screen">
+        <div class="hero">
+          <div>
+            <p class="eyebrow">Твоё первое приключение на клавиатуре</p>
+            <h1>Научимся печатать<br><span>десятью пальцами!</span></h1>
+            <p class="hero-copy">Проходи короткие уровни, собирай звёзды и не бойся ошибок. Они помогают учиться.</p>
+            <button class="primary-button" id="continue-button" type="button">Начать занятие</button>
+          </div>
+          <div class="hero-card" aria-hidden="true">
+            <div class="smile">⌣</div>
+            <div class="mini-keys"><kbd>А</kbd><kbd>О</kbd></div>
+            <p>Пальцы готовы!</p>
+          </div>
+        </div>
+
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Курс 1</p>
+            <h2>Средний ряд</h2>
+          </div>
+          <p id="progress-label">Пройдено 0 из 20</p>
+        </div>
+        <div class="progress-track"><div id="progress-fill"></div></div>
+        <div id="level-grid" class="level-grid" aria-live="polite"></div>
+      </section>
+
+      <section id="trainer-screen" class="screen hidden">
+        <button class="back-button" id="back-button" type="button">← К карте уровней</button>
+        <div class="lesson-heading">
+          <div>
+            <p class="eyebrow" id="lesson-number">Уровень 1</p>
+            <h1 id="lesson-title">Домики для пальцев</h1>
+            <p id="lesson-tip"></p>
+          </div>
+          <div class="lesson-score"><span>Точность</span><strong id="accuracy">100%</strong></div>
+        </div>
+
+        <div class="typing-card">
+          <div id="typing-text" class="typing-text" aria-label="Текст для печати"></div>
+          <p id="message" class="message">Нажми подсвеченную клавишу</p>
+        </div>
+
+        <div class="hands-hint" id="finger-hint">Указательный палец левой руки</div>
+        <div id="keyboard" class="keyboard" aria-label="Средний ряд клавиатуры"></div>
+      </section>
+
+      <section id="result-screen" class="screen hidden">
+        <div class="result-card">
+          <div class="result-stars" id="result-stars">★★★</div>
+          <p class="eyebrow">Уровень пройден</p>
+          <h1 id="result-title">Отличная работа!</h1>
+          <p id="result-copy"></p>
+          <div class="result-actions">
+            <button class="secondary-button" id="retry-button" type="button">Ещё раз</button>
+            <button class="primary-button" id="next-button" type="button">Следующий уровень</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>
