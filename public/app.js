@@ -1,48 +1,101 @@
+// Включите для тестирования всех курсов и занятий без прохождения предыдущих.
+const isFullAccess = false;
+
 const KEYBOARD_ROWS = [
   ["ё", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
   ["й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з", "х", "ъ"],
   ["ф", "ы", "в", "а", "п", "р", "о", "л", "д", "ж", "э"],
-  ["я", "ч", "с", "м", "и", "т", "ь", "б", "ю"]
+  ["я", "ч", "с", "м", "и", "т", "ь", "б", "ю"],
 ];
 const TRAINABLE_CHARACTERS = new Set([...KEYBOARD_ROWS.flat(), " "]);
+
 const RUSSIAN_KEY_CODES = new Set([
-  "Backquote", "KeyQ", "KeyW", "KeyE", "KeyR", "KeyT", "KeyY", "KeyU",
-  "KeyI", "KeyO", "KeyP", "BracketLeft", "BracketRight", "KeyA", "KeyS",
-  "KeyD", "KeyF", "KeyG", "KeyH", "KeyJ", "KeyK", "KeyL", "Semicolon",
-  "Quote", "KeyZ", "KeyX", "KeyC", "KeyV", "KeyB", "KeyN", "KeyM",
-  "Comma", "Period"
+  "Backquote",
+  "KeyQ",
+  "KeyW",
+  "KeyE",
+  "KeyR",
+  "KeyT",
+  "KeyY",
+  "KeyU",
+  "KeyI",
+  "KeyO",
+  "KeyP",
+  "BracketLeft",
+  "BracketRight",
+  "KeyA",
+  "KeyS",
+  "KeyD",
+  "KeyF",
+  "KeyG",
+  "KeyH",
+  "KeyJ",
+  "KeyK",
+  "KeyL",
+  "Semicolon",
+  "Quote",
+  "KeyZ",
+  "KeyX",
+  "KeyC",
+  "KeyV",
+  "KeyB",
+  "KeyN",
+  "KeyM",
+  "Comma",
+  "Period",
 ]);
 const COURSE_VERSION = 3;
 const FINGERS = {
-  "1": "Мизинец левой руки", "2": "Безымянный палец левой руки",
-  "3": "Средний палец левой руки", "4": "Указательный палец левой руки",
-  "5": "Указательный палец левой руки", "6": "Указательный палец правой руки",
-  "7": "Указательный палец правой руки", "8": "Средний палец правой руки",
-  "9": "Безымянный палец правой руки", "0": "Мизинец правой руки",
+  1: "Мизинец левой руки",
+  2: "Безымянный палец левой руки",
+  3: "Средний палец левой руки",
+  4: "Указательный палец левой руки",
+  5: "Указательный палец левой руки",
+  6: "Указательный палец правой руки",
+  7: "Указательный палец правой руки",
+  8: "Средний палец правой руки",
+  9: "Безымянный палец правой руки",
+  0: "Мизинец правой руки",
   ё: "Мизинец левой руки",
-  й: "Мизинец левой руки", ц: "Безымянный палец левой руки",
-  у: "Средний палец левой руки", к: "Указательный палец левой руки",
-  е: "Указательный палец левой руки", н: "Указательный палец правой руки",
-  г: "Указательный палец правой руки", ш: "Средний палец правой руки",
-  щ: "Безымянный палец правой руки", з: "Мизинец правой руки",
-  х: "Мизинец правой руки", ъ: "Мизинец правой руки",
-  ф: "Мизинец левой руки", ы: "Безымянный палец левой руки",
-  в: "Средний палец левой руки", а: "Указательный палец левой руки",
-  п: "Указательный палец левой руки", р: "Указательный палец правой руки",
-  о: "Указательный палец правой руки", л: "Средний палец правой руки",
-  д: "Безымянный палец правой руки", ж: "Мизинец правой руки",
-  э: "Мизинец правой руки", я: "Мизинец левой руки",
-  ч: "Безымянный палец левой руки", с: "Средний палец левой руки",
-  м: "Указательный палец левой руки", и: "Указательный палец левой руки",
-  т: "Указательный палец правой руки", ь: "Указательный палец правой руки",
-  б: "Средний палец правой руки", ю: "Безымянный палец правой руки",
-  " ": "Большой палец — пробел"
+  й: "Мизинец левой руки",
+  ц: "Безымянный палец левой руки",
+  у: "Средний палец левой руки",
+  к: "Указательный палец левой руки",
+  е: "Указательный палец левой руки",
+  н: "Указательный палец правой руки",
+  г: "Указательный палец правой руки",
+  ш: "Средний палец правой руки",
+  щ: "Безымянный палец правой руки",
+  з: "Мизинец правой руки",
+  х: "Мизинец правой руки",
+  ъ: "Мизинец правой руки",
+  ф: "Мизинец левой руки",
+  ы: "Безымянный палец левой руки",
+  в: "Средний палец левой руки",
+  а: "Указательный палец левой руки",
+  п: "Указательный палец левой руки",
+  р: "Указательный палец правой руки",
+  о: "Указательный палец правой руки",
+  л: "Средний палец правой руки",
+  д: "Безымянный палец правой руки",
+  ж: "Мизинец правой руки",
+  э: "Мизинец правой руки",
+  я: "Мизинец левой руки",
+  ч: "Безымянный палец левой руки",
+  с: "Средний палец левой руки",
+  м: "Указательный палец левой руки",
+  и: "Указательный палец левой руки",
+  т: "Указательный палец правой руки",
+  ь: "Указательный палец правой руки",
+  б: "Средний палец правой руки",
+  ю: "Безымянный палец правой руки",
+  " ": "Большой палец — пробел",
 };
 
 const screens = {
   map: document.querySelector("#map-screen"),
   trainer: document.querySelector("#trainer-screen"),
-  result: document.querySelector("#result-screen")
+  result: document.querySelector("#result-screen"),
 };
 
 let courses = [];
@@ -61,14 +114,19 @@ function levelKey(courseId, levelId) {
 
 function loadProgress() {
   try {
-    const savedProgress = JSON.parse(localStorage.getItem("klavishki-progress"));
+    const savedProgress = JSON.parse(
+      localStorage.getItem("klavishki-progress"),
+    );
     if (savedProgress?.courseVersion === COURSE_VERSION) return savedProgress;
     if (savedProgress?.courseVersion === 2) {
       return {
         courseVersion: COURSE_VERSION,
         stars: Object.fromEntries(
-          Object.entries(savedProgress.stars || {}).map(([id, stars]) => [`middle:${id}`, stars])
-        )
+          Object.entries(savedProgress.stars || {}).map(([id, stars]) => [
+            `middle:${id}`,
+            stars,
+          ]),
+        ),
       };
     }
   } catch {
@@ -82,29 +140,50 @@ function saveProgress() {
 }
 
 function showScreen(name) {
-  Object.entries(screens).forEach(([key, screen]) => screen.classList.toggle("hidden", key !== name));
+  Object.entries(screens).forEach(([key, screen]) =>
+    screen.classList.toggle("hidden", key !== name),
+  );
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function isCourseComplete(course) {
-  return course.levels.every((level) => progress.stars[levelKey(course.id, level.id)]);
+  return course.levels.every(
+    (level) => progress.stars[levelKey(course.id, level.id)],
+  );
 }
 
 function isCourseUnlocked(courseIndex) {
-  return courseIndex === 0 || isCourseComplete(courses[courseIndex - 1]);
+  return (
+    isFullAccess ||
+    courseIndex === 0 ||
+    isCourseComplete(courses[courseIndex - 1])
+  );
 }
 
 function isLevelUnlocked(course, courseIndex, levelIndex) {
+  if (isFullAccess) return true;
   if (!isCourseUnlocked(courseIndex)) return false;
-  return levelIndex === 0 || Boolean(progress.stars[levelKey(course.id, course.levels[levelIndex - 1].id)]);
+  return (
+    levelIndex === 0 ||
+    Boolean(
+      progress.stars[levelKey(course.id, course.levels[levelIndex - 1].id)],
+    )
+  );
 }
 
 function findNextLevel() {
   for (let courseIndex = 0; courseIndex < courses.length; courseIndex += 1) {
     const course = courses[courseIndex];
-    for (let levelIndex = 0; levelIndex < course.levels.length; levelIndex += 1) {
+    for (
+      let levelIndex = 0;
+      levelIndex < course.levels.length;
+      levelIndex += 1
+    ) {
       const level = course.levels[levelIndex];
-      if (!progress.stars[levelKey(course.id, level.id)] && isLevelUnlocked(course, courseIndex, levelIndex)) {
+      if (
+        !progress.stars[levelKey(course.id, level.id)] &&
+        isLevelUnlocked(course, courseIndex, levelIndex)
+      ) {
         return { course, level };
       }
     }
@@ -118,18 +197,27 @@ function renderMap() {
     const course = courses.find((item) => item.levels.includes(level));
     return progress.stars[levelKey(course.id, level.id)];
   }).length;
-  const totalStars = Object.values(progress.stars).reduce((sum, stars) => sum + stars, 0);
+  const totalStars = Object.values(progress.stars).reduce(
+    (sum, stars) => sum + stars,
+    0,
+  );
 
   document.querySelector("#total-stars").textContent = totalStars;
-  document.querySelector("#progress-label").textContent = `Пройдено ${completed} из ${allLevels.length} занятий`;
-  document.querySelector("#progress-fill").style.width = `${(completed / allLevels.length) * 100}%`;
-  document.querySelector("#continue-button").textContent = completed ? "Продолжить занятие" : "Начать занятие";
+  document.querySelector("#progress-label").textContent =
+    `Пройдено ${completed} из ${allLevels.length} занятий`;
+  document.querySelector("#progress-fill").style.width =
+    `${(completed / allLevels.length) * 100}%`;
+  document.querySelector("#continue-button").textContent = completed
+    ? "Продолжить занятие"
+    : "Начать занятие";
 
   const container = document.querySelector("#courses-container");
   container.innerHTML = "";
   courses.forEach((course, courseIndex) => {
     const unlocked = isCourseUnlocked(courseIndex);
-    const completedInCourse = course.levels.filter((level) => progress.stars[levelKey(course.id, level.id)]).length;
+    const completedInCourse = course.levels.filter(
+      (level) => progress.stars[levelKey(course.id, level.id)],
+    ).length;
     const section = document.createElement("section");
     section.className = `course-section${unlocked ? "" : " locked"}`;
     section.innerHTML = `
@@ -196,7 +284,8 @@ function renderLayoutStatus() {
   const value = document.querySelector("#layout-value");
   const warning = document.querySelector("#layout-warning");
   status.className = `layout-status ${keyboardLayout}`;
-  value.textContent = keyboardLayout === "unknown" ? "?" : keyboardLayout.toUpperCase();
+  value.textContent =
+    keyboardLayout === "unknown" ? "?" : keyboardLayout.toUpperCase();
   warning.classList.toggle("hidden", keyboardLayout !== "en");
 }
 
@@ -208,17 +297,23 @@ function setKeyboardLayout(layout) {
 
 function renderTrainer() {
   const text = document.querySelector("#typing-text");
-  text.innerHTML = [...activeLevel.text].map((character, index) => {
-    let className = "";
-    if (index < position) className = "done";
-    if (index === position) className = wrongFlash ? "current wrong" : "current";
-    return `<span class="${className}">${character === " " ? "&nbsp;" : character}</span>`;
-  }).join("");
+  text.innerHTML = [...activeLevel.text]
+    .map((character, index) => {
+      let className = "";
+      if (index < position) className = "done";
+      if (index === position)
+        className = wrongFlash ? "current wrong" : "current";
+      return `<span class="${className}">${character === " " ? "&nbsp;" : character}</span>`;
+    })
+    .join("");
 
-  const accuracy = attempts ? Math.round(((attempts - mistakes) / attempts) * 100) : 100;
+  const accuracy = attempts
+    ? Math.round(((attempts - mistakes) / attempts) * 100)
+    : 100;
   document.querySelector("#accuracy").textContent = `${accuracy}%`;
   const nextCharacter = activeLevel.text[position];
-  document.querySelector("#finger-hint").textContent = FINGERS[nextCharacter] || "Печатай дальше";
+  document.querySelector("#finger-hint").textContent =
+    FINGERS[nextCharacter] || "Печатай дальше";
   document.querySelectorAll(".key").forEach((key) => {
     const isActive = key.dataset.key === nextCharacter;
     key.classList.toggle("active", isActive);
@@ -232,7 +327,12 @@ function createKey(character) {
   key.type = "button";
   key.dataset.key = character;
   key.textContent = character.toUpperCase();
-  key.setAttribute("aria-label", /^\d$/.test(character) ? `Цифра ${character}` : `Буква ${character.toUpperCase()}`);
+  key.setAttribute(
+    "aria-label",
+    /^\d$/.test(character)
+      ? `Цифра ${character}`
+      : `Буква ${character.toUpperCase()}`,
+  );
   key.addEventListener("click", () => processInput(character));
   return key;
 }
@@ -264,7 +364,9 @@ function nextAfterActive() {
     return { course: activeCourse, level: activeCourse.levels[levelIndex + 1] };
   }
   const nextCourse = courses[courseIndex + 1];
-  return nextCourse ? { course: nextCourse, level: nextCourse.levels[0] } : null;
+  return nextCourse
+    ? { course: nextCourse, level: nextCourse.levels[0] }
+    : null;
 }
 
 function finishLevel() {
@@ -275,16 +377,25 @@ function finishLevel() {
   saveProgress();
   renderMap();
 
-  document.querySelector("#result-stars").textContent = `${"★".repeat(stars)}${"☆".repeat(3 - stars)}`;
-  document.querySelector("#result-title").textContent = stars === 3 ? "Великолепно!" : "Занятие готово!";
+  document.querySelector("#result-stars").textContent =
+    `${"★".repeat(stars)}${"☆".repeat(3 - stars)}`;
+  document.querySelector("#result-title").textContent =
+    stars === 3 ? "Великолепно!" : "Занятие готово!";
   document.querySelector("#result-copy").textContent =
     `Точность ${accuracy}%. ${mistakes ? "Ошибки помогли пальцам запомнить дорогу." : "Ни одной ошибки — вот это сосредоточенность!"}`;
-  document.querySelector("#next-button").textContent = nextAfterActive() ? "Следующее занятие" : "К карте курсов";
+  document.querySelector("#next-button").textContent = nextAfterActive()
+    ? "Следующее занятие"
+    : "К карте курсов";
   showScreen("result");
 }
 
 function processInput(typed) {
-  if (screens.trainer.classList.contains("hidden") || !activeLevel || !TRAINABLE_CHARACTERS.has(typed)) return;
+  if (
+    screens.trainer.classList.contains("hidden") ||
+    !activeLevel ||
+    !TRAINABLE_CHARACTERS.has(typed)
+  )
+    return;
   const expected = activeLevel.text[position];
   attempts += 1;
   const message = document.querySelector("#message");
@@ -311,7 +422,10 @@ function handleKeydown(event) {
   const typed = event.key.toLowerCase();
   if (/^[а-яё]$/i.test(event.key)) {
     setKeyboardLayout("ru");
-  } else if (/^[a-z]$/i.test(event.key) || (RUSSIAN_KEY_CODES.has(event.code) && !TRAINABLE_CHARACTERS.has(typed))) {
+  } else if (
+    /^[a-z]$/i.test(event.key) ||
+    (RUSSIAN_KEY_CODES.has(event.code) && !TRAINABLE_CHARACTERS.has(typed))
+  ) {
     event.preventDefault();
     setKeyboardLayout("en");
     const message = document.querySelector("#message");
@@ -325,13 +439,19 @@ function handleKeydown(event) {
   processInput(typed);
 }
 
-document.querySelector("#home-button").addEventListener("click", () => showScreen("map"));
-document.querySelector("#back-button").addEventListener("click", () => showScreen("map"));
+document
+  .querySelector("#home-button")
+  .addEventListener("click", () => showScreen("map"));
+document
+  .querySelector("#back-button")
+  .addEventListener("click", () => showScreen("map"));
 document.querySelector("#continue-button").addEventListener("click", () => {
   const next = findNextLevel();
   if (next?.level) startLevel(next.course.id, next.level.id);
 });
-document.querySelector("#retry-button").addEventListener("click", () => startLevel(activeCourse.id, activeLevel.id));
+document
+  .querySelector("#retry-button")
+  .addEventListener("click", () => startLevel(activeCourse.id, activeLevel.id));
 document.querySelector("#next-button").addEventListener("click", () => {
   const next = nextAfterActive();
   if (next) startLevel(next.course.id, next.level.id);
