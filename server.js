@@ -2,7 +2,7 @@ import { readFile } from "node:fs";
 import { createServer } from "node:http";
 import { dirname, extname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { levels } from "./data/levels.js";
+import { courses } from "./data/courses.js";
 
 const port = Number(process.env.PORT) || 3000;
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
@@ -38,8 +38,8 @@ function serveFile(response, filePath) {
 const server = createServer((request, response) => {
   const url = new URL(request.url, `http://${request.headers.host}`);
 
-  if (request.method === "GET" && url.pathname === "/api/levels") {
-    sendJson(response, 200, levels);
+  if (request.method === "GET" && url.pathname === "/api/courses") {
+    sendJson(response, 200, courses);
     return;
   }
 
