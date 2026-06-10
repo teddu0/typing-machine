@@ -92,37 +92,33 @@
         </div>
 
         <div class="hand-position-card">
-          <div class="guide-keyboard" aria-label="Правильное положение рук на среднем ряду">
-            <div class="guide-key-row">
-              <kbd>Ф</kbd><kbd>Ы</kbd><kbd>В</kbd><kbd class="guide-home-key">А</kbd><kbd>П</kbd>
-              <kbd>Р</kbd><kbd class="guide-home-key">О</kbd><kbd>Л</kbd><kbd>Д</kbd><kbd>Ж</kbd><kbd>Э</kbd>
-            </div>
-            <div class="guide-space">ПРОБЕЛ</div>
-          </div>
+          <p class="guide-explore">Наведи курсор на любую клавишу и посмотри, какой палец к ней потянется</p>
+          <div class="guide-keyboard" id="guide-keyboard" aria-label="Интерактивная клавиатура"></div>
 
           <div class="guide-hands" aria-hidden="true">
             <div class="guide-hand left-hand">
-              <span class="finger pinky"></span>
-              <span class="finger ring"></span>
-              <span class="finger middle"></span>
-              <span class="finger index"></span>
+              <span class="finger pinky" data-finger="left-pinky" data-name="мизинец"></span>
+              <span class="finger ring" data-finger="left-ring" data-name="безымянный"></span>
+              <span class="finger middle" data-finger="left-middle" data-name="средний"></span>
+              <span class="finger index" data-finger="left-index" data-name="указательный"></span>
               <span class="guide-palm"></span>
-              <span class="thumb"></span>
+              <span class="thumb" data-finger="thumb" data-name="большой"></span>
+              <span class="guide-wrist"></span>
             </div>
             <div class="guide-hand right-hand">
-              <span class="finger index"></span>
-              <span class="finger middle"></span>
-              <span class="finger ring"></span>
-              <span class="finger pinky"></span>
+              <span class="finger index" data-finger="right-index" data-name="указательный"></span>
+              <span class="finger middle" data-finger="right-middle" data-name="средний"></span>
+              <span class="finger ring" data-finger="right-ring" data-name="безымянный"></span>
+              <span class="finger pinky" data-finger="right-pinky" data-name="мизинец"></span>
               <span class="guide-palm"></span>
-              <span class="thumb"></span>
+              <span class="thumb" data-finger="thumb" data-name="большой"></span>
+              <span class="guide-wrist"></span>
             </div>
           </div>
 
-          <div class="guide-labels">
-            <span class="left-label">Левый указательный<br><strong>на насечке А</strong></span>
-            <span class="thumb-label">Большие пальцы<br><strong>над пробелом</strong></span>
-            <span class="right-label">Правый указательный<br><strong>на насечке О</strong></span>
+          <div class="guide-finger-status" id="guide-finger-status" aria-live="polite">
+            <span>Исходное положение</span>
+            <strong>Указательные пальцы находят насечки А и О, большие пальцы ждут над пробелом</strong>
           </div>
         </div>
 

@@ -90,6 +90,19 @@ const FINGERS = {
   ю: "Безымянный палец правой руки",
   " ": "Большой палец — пробел",
 };
+const FINGER_IDS = {
+  1: "left-pinky", 2: "left-ring", 3: "left-middle", 4: "left-index", 5: "left-index",
+  6: "right-index", 7: "right-index", 8: "right-middle", 9: "right-ring", 0: "right-pinky",
+  й: "left-pinky", ц: "left-ring", у: "left-middle", к: "left-index", е: "left-index",
+  н: "right-index", г: "right-index", ш: "right-middle", щ: "right-ring",
+  з: "right-pinky", х: "right-pinky", ъ: "right-pinky",
+  ф: "left-pinky", ы: "left-ring", в: "left-middle", а: "left-index", п: "left-index",
+  р: "right-index", о: "right-index", л: "right-middle", д: "right-ring",
+  ж: "right-pinky", э: "right-pinky",
+  я: "left-pinky", ч: "left-ring", с: "left-middle", м: "left-index", и: "left-index",
+  т: "right-index", ь: "right-index", б: "right-middle", ю: "right-ring",
+  " ": "thumb",
+};
 
 const screens = {
   map: document.querySelector("#map-screen"),
@@ -353,6 +366,74 @@ function createKey(character) {
   return key;
 }
 
+function clearGuideReach() {
+  document.querySelectorAll(".guide-key.reached").forEach((key) => key.classList.remove("reached"));
+  document.querySelectorAll("[data-finger].reaching").forEach((finger) => {
+    finger.classList.remove("reaching");
+    finger.style.removeProperty("--reach-x");
+    finger.style.removeProperty("--reach-y");
+  });
+  document.querySelectorAll(".guide-hand.active").forEach((hand) => hand.classList.remove("active"));
+  document.querySelector("#guide-finger-status").innerHTML =
+    "<span>Исходное положение</span><strong>Указательные пальцы находят насечки А и О, большие пальцы ждут над пробелом</strong>";
+}
+
+function showGuideReach(key, character) {
+  clearGuideReach();
+  key.classList.add("reached");
+  const fingerId = FINGER_IDS[character];
+  const fingers = [...document.querySelectorAll(`[data-finger="${fingerId}"]`)];
+  const keyRect = key.getBoundingClientRect();
+
+  fingers.forEach((finger) => {
+    const fingerRect = finger.getBoundingClientRect();
+    const reachX = keyRect.left + keyRect.width / 2 - (fingerRect.left + fingerRect.width / 2);
+    const reachY = keyRect.top + keyRect.height / 2 - (fingerRect.top + 12);
+    finger.style.setProperty("--reach-x", `${reachX}px`);
+    finger.style.setProperty("--reach-y", `${reachY}px`);
+    finger.classList.add("reaching");
+    finger.setAttribute("aria-label", finger.dataset.name);
+    finger.closest(".guide-hand").classList.add("active");
+  });
+
+  const label = character === " " ? "ПРОБЕЛ" : character.toUpperCase();
+  document.querySelector("#guide-finger-status").innerHTML =
+    `<span>Клавиша ${label}</span><strong>${FINGERS[character]}</strong>`;
+}
+
+function renderGuideKeyboard() {
+  const keyboard = document.querySelector("#guide-keyboard");
+  keyboard.innerHTML = "";
+  KEYBOARD_ROWS.forEach((row, rowIndex) => {
+    const rowElement = document.createElement("div");
+    rowElement.className = `guide-key-row guide-row-${rowIndex + 1}`;
+    row.forEach((character) => {
+      const key = document.createElement("button");
+      key.className = `guide-key${character === "а" || character === "о" ? " guide-home-key" : ""}`;
+      key.type = "button";
+      key.dataset.key = character;
+      key.textContent = character.toUpperCase();
+      key.addEventListener("mouseenter", () => showGuideReach(key, character));
+      key.addEventListener("focus", () => showGuideReach(key, character));
+      rowElement.append(key);
+    });
+    keyboard.append(rowElement);
+  });
+
+  const space = document.createElement("button");
+  space.className = "guide-key guide-space";
+  space.type = "button";
+  space.dataset.key = " ";
+  space.textContent = "ПРОБЕЛ";
+  space.addEventListener("mouseenter", () => showGuideReach(space, " "));
+  space.addEventListener("focus", () => showGuideReach(space, " "));
+  keyboard.append(space);
+  keyboard.addEventListener("mouseleave", clearGuideReach);
+  keyboard.addEventListener("focusout", (event) => {
+    if (!keyboard.contains(event.relatedTarget)) clearGuideReach();
+  });
+}
+
 function renderKeyboard() {
   const keyboard = document.querySelector("#keyboard");
   keyboard.innerHTML = "";
@@ -460,7 +541,10 @@ document
   .addEventListener("click", () => showScreen("map"));
 document
   .querySelector("#guide-button")
-  .addEventListener("click", () => showScreen("guide"));
+  .addEventListener("click", () => {
+    renderGuideKeyboard();
+    showScreen("guide");
+  });
 document
   .querySelector("#guide-back-button")
   .addEventListener("click", () => showScreen("map"));
