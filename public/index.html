@@ -54,11 +54,21 @@
             <h1 id="lesson-title">Домики для пальцев</h1>
             <p id="lesson-tip"></p>
           </div>
-          <div class="lesson-score"><span>Точность</span><strong id="accuracy">100%</strong></div>
+          <div class="lesson-status">
+            <div class="layout-status" id="layout-status">
+              <span>Раскладка</span>
+              <strong id="layout-value">?</strong>
+            </div>
+            <div class="lesson-score"><span>Точность</span><strong id="accuracy">100%</strong></div>
+          </div>
         </div>
 
         <div class="typing-card">
           <div id="typing-text" class="typing-text" aria-label="Текст для печати"></div>
+          <div id="layout-warning" class="layout-warning hidden" role="alert">
+            <strong>Сейчас включена английская раскладка EN</strong>
+            <span>Переключи клавиатуру на русский язык RU и попробуй ещё раз.</span>
+          </div>
           <p id="message" class="message">Нажми подсвеченную клавишу</p>
         </div>
 

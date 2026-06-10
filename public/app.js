@@ -1,4 +1,8 @@
 const ROW = ["ф", "ы", "в", "а", "п", "р", "о", "л", "д", "ж", "э"];
+const HOME_ROW_CODES = new Set([
+  "KeyA", "KeyS", "KeyD", "KeyF", "KeyG", "KeyH",
+  "KeyJ", "KeyK", "KeyL", "Semicolon", "Quote"
+]);
 const COURSE_VERSION = 2;
 const FINGERS = {
   ф: "Мизинец левой руки",
@@ -27,6 +31,7 @@ let position = 0;
 let attempts = 0;
 let mistakes = 0;
 let wrongFlash = false;
+let keyboardLayout = "unknown";
 let progress = loadProgress();
 
 function loadProgress() {
@@ -85,14 +90,32 @@ function startLevel(id) {
   attempts = 0;
   mistakes = 0;
   wrongFlash = false;
+  keyboardLayout = "unknown";
   document.querySelector("#lesson-number").textContent = `Уровень ${activeLevel.id} из ${levels.length}`;
   document.querySelector("#lesson-title").textContent = activeLevel.title;
   document.querySelector("#lesson-tip").textContent = activeLevel.tip;
   document.querySelector("#message").textContent = "Нажми подсвеченную клавишу";
   document.querySelector("#message").className = "message";
+  renderLayoutStatus();
   renderKeyboard();
   renderTrainer();
   showScreen("trainer");
+}
+
+function renderLayoutStatus() {
+  const status = document.querySelector("#layout-status");
+  const value = document.querySelector("#layout-value");
+  const warning = document.querySelector("#layout-warning");
+
+  status.className = `layout-status ${keyboardLayout}`;
+  value.textContent = keyboardLayout === "unknown" ? "?" : keyboardLayout.toUpperCase();
+  warning.classList.toggle("hidden", keyboardLayout !== "en");
+}
+
+function setKeyboardLayout(layout) {
+  if (keyboardLayout === layout) return;
+  keyboardLayout = layout;
+  renderLayoutStatus();
 }
 
 function renderTrainer() {
@@ -187,6 +210,18 @@ function processInput(typed) {
 
 function handleKeydown(event) {
   const typed = event.key.toLowerCase();
+
+  if (/^[а-яё]$/i.test(event.key)) {
+    setKeyboardLayout("ru");
+  } else if (/^[a-z]$/i.test(event.key) || HOME_ROW_CODES.has(event.code)) {
+    event.preventDefault();
+    setKeyboardLayout("en");
+    const message = document.querySelector("#message");
+    message.textContent = "Сначала переключим клавиатуру на русский язык";
+    message.className = "message layout-help";
+    return;
+  }
+
   if (!ROW.includes(typed) && typed !== " ") return;
   event.preventDefault();
   processInput(typed);

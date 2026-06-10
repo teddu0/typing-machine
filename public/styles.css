@@ -210,9 +210,32 @@ h1 span { color: var(--purple); }
 
 .lesson-heading h1 { margin-bottom: 10px; font-size: clamp(34px, 5vw, 54px); }
 .lesson-heading p:not(.eyebrow) { max-width: 680px; color: var(--muted); font-size: 17px; }
+.lesson-status { display: flex; align-items: stretch; gap: 12px; }
 .lesson-score { min-width: 112px; padding: 16px; border-radius: 18px; background: white; text-align: center; box-shadow: var(--shadow); }
 .lesson-score span { display: block; margin-bottom: 5px; color: var(--muted); font-size: 13px; }
 .lesson-score strong { font-size: 24px; }
+
+.layout-status {
+  min-width: 112px;
+  padding: 16px;
+  border: 2px solid #e5e1d8;
+  border-radius: 18px;
+  background: white;
+  text-align: center;
+  box-shadow: var(--shadow);
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.layout-status span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.layout-status strong { font-size: 24px; }
+.layout-status.ru { color: #267951; border-color: #8bd4ae; background: #edfff5; }
+.layout-status.en { color: #b3443d; border-color: #ef9c94; background: #fff1ef; }
 
 .typing-card {
   margin-top: 30px;
@@ -236,9 +259,22 @@ h1 span { color: var(--purple); }
 .typing-text .done { color: var(--green); }
 .typing-text .current { color: var(--ink); background: var(--yellow); border-radius: 7px; }
 .typing-text .wrong { color: white; background: var(--red); }
+.layout-warning {
+  margin-top: 24px;
+  padding: 16px 18px;
+  display: grid;
+  gap: 5px;
+  border: 2px solid #ef9c94;
+  border-radius: 16px;
+  color: #a43d36;
+  background: #fff1ef;
+  text-align: center;
+}
+.layout-warning span { color: #865c59; }
 .message { min-height: 24px; margin: 20px 0 0; color: var(--muted); font-weight: 800; text-align: center; }
 .message.good { color: #3d9d70; }
 .message.try { color: #d45a51; }
+.message.layout-help { color: #b3443d; }
 
 .hands-hint {
   width: fit-content;
@@ -341,6 +377,8 @@ h1 span { color: var(--purple); }
   .section-heading { margin-top: 36px; }
   .level-grid { grid-template-columns: 1fr; }
   .lesson-heading { align-items: start; }
+  .lesson-status { flex-direction: column; }
+  .layout-status,
   .lesson-score { min-width: 96px; padding: 12px 8px; }
   .result-actions { flex-direction: column-reverse; }
 }
