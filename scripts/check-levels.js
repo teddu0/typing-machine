@@ -1,6 +1,6 @@
 import { courses } from "../data/courses.js";
 
-const allowedCharacters = new Set("ёйцукенгшщзхъфывапролджэячсмитьбю1234567890 ");
+const allowedCharacters = new Set("йцукенгшщзхъфывапролджэячсмитьбю1234567890 ");
 const levels = courses.flatMap((course) =>
   course.levels.map((level) => ({ ...level, courseId: course.id }))
 );

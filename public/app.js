@@ -2,7 +2,7 @@
 const isFullAccess = false;
 
 const KEYBOARD_ROWS = [
-  ["ё", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+  ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
   ["й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з", "х", "ъ"],
   ["ф", "ы", "в", "а", "п", "р", "о", "л", "д", "ж", "э"],
   ["я", "ч", "с", "м", "и", "т", "ь", "б", "ю"],
@@ -44,7 +44,7 @@ const RUSSIAN_KEY_CODES = new Set([
   "Comma",
   "Period",
 ]);
-const COURSE_VERSION = 3;
+const COURSE_VERSION = 4;
 const FINGERS = {
   1: "Мизинец левой руки",
   2: "Безымянный палец левой руки",
@@ -56,7 +56,6 @@ const FINGERS = {
   8: "Средний палец правой руки",
   9: "Безымянный палец правой руки",
   0: "Мизинец правой руки",
-  ё: "Мизинец левой руки",
   й: "Мизинец левой руки",
   ц: "Безымянный палец левой руки",
   у: "Средний палец левой руки",
@@ -112,12 +111,28 @@ function levelKey(courseId, levelId) {
   return `${courseId}:${levelId}`;
 }
 
+function migrateVersionThreeProgress(savedProgress) {
+  const stars = Object.entries(savedProgress.stars || {}).flatMap(
+    ([key, value]) => {
+      const [courseId, levelIdText] = key.split(":");
+      const levelId = Number(levelIdText);
+      if (courseId !== "upper") return [[key, value]];
+      if (levelId === 17) return [];
+      return [[levelKey(courseId, levelId > 17 ? levelId - 1 : levelId), value]];
+    },
+  );
+  return { courseVersion: COURSE_VERSION, stars: Object.fromEntries(stars) };
+}
+
 function loadProgress() {
   try {
     const savedProgress = JSON.parse(
       localStorage.getItem("klavishki-progress"),
     );
     if (savedProgress?.courseVersion === COURSE_VERSION) return savedProgress;
+    if (savedProgress?.courseVersion === 3) {
+      return migrateVersionThreeProgress(savedProgress);
+    }
     if (savedProgress?.courseVersion === 2) {
       return {
         courseVersion: COURSE_VERSION,
@@ -420,7 +435,7 @@ function processInput(typed) {
 
 function handleKeydown(event) {
   const typed = event.key.toLowerCase();
-  if (/^[а-яё]$/i.test(event.key)) {
+  if (/^[а-я]$/i.test(event.key)) {
     setKeyboardLayout("ru");
   } else if (
     /^[a-z]$/i.test(event.key) ||

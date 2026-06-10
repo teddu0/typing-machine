@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="#5b49c8"/>
+  <rect x="4" y="4" width="56" height="51" rx="16" fill="#7967e8"/>
+  <text
+    x="32"
+    y="43"
+    fill="#ffffff"
+    font-family="Arial, sans-serif"
+    font-size="34"
+    font-weight="700"
+    text-anchor="middle"
+  >А</text>
+</svg>
