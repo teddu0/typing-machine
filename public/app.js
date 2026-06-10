@@ -93,6 +93,7 @@ const FINGERS = {
 
 const screens = {
   map: document.querySelector("#map-screen"),
+  guide: document.querySelector("#guide-screen"),
   trainer: document.querySelector("#trainer-screen"),
   result: document.querySelector("#result-screen"),
 };
@@ -457,6 +458,16 @@ function handleKeydown(event) {
 document
   .querySelector("#home-button")
   .addEventListener("click", () => showScreen("map"));
+document
+  .querySelector("#guide-button")
+  .addEventListener("click", () => showScreen("guide"));
+document
+  .querySelector("#guide-back-button")
+  .addEventListener("click", () => showScreen("map"));
+document.querySelector("#guide-start-button").addEventListener("click", () => {
+  const next = findNextLevel();
+  if (next?.level) startLevel(next.course.id, next.level.id);
+});
 document
   .querySelector("#back-button")
   .addEventListener("click", () => showScreen("map"));

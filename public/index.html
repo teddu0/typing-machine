@@ -14,9 +14,15 @@
         <span class="brand-mark">А</span>
         <span>Клавишки</span>
       </button>
-      <div class="total-stars" aria-label="Собрано звёзд">
-        <span>★</span>
-        <strong id="total-stars">0</strong>
+      <div class="header-actions">
+        <button class="guide-button" id="guide-button" type="button">
+          <span aria-hidden="true">?</span>
+          Как поставить руки
+        </button>
+        <div class="total-stars" aria-label="Собрано звёзд">
+          <span>★</span>
+          <strong id="total-stars">0</strong>
+        </div>
       </div>
     </header>
 
@@ -75,6 +81,73 @@
 
         <div class="hands-hint" id="finger-hint">Указательный палец левой руки</div>
         <div id="keyboard" class="keyboard" aria-label="Экранная клавиатура"></div>
+      </section>
+
+      <section id="guide-screen" class="screen hidden">
+        <button class="back-button" id="guide-back-button" type="button">← К карте курсов</button>
+        <div class="guide-intro">
+          <p class="eyebrow">Перед первым занятием</p>
+          <h1>Положим руки<br><span>на свои места</span></h1>
+          <p>Не нужно прижимать клавиши или напрягать пальцы. Руки просто отдыхают над клавиатурой и готовы начать.</p>
+        </div>
+
+        <div class="hand-position-card">
+          <div class="guide-keyboard" aria-label="Правильное положение рук на среднем ряду">
+            <div class="guide-key-row">
+              <kbd>Ф</kbd><kbd>Ы</kbd><kbd>В</kbd><kbd class="guide-home-key">А</kbd><kbd>П</kbd>
+              <kbd>Р</kbd><kbd class="guide-home-key">О</kbd><kbd>Л</kbd><kbd>Д</kbd><kbd>Ж</kbd><kbd>Э</kbd>
+            </div>
+            <div class="guide-space">ПРОБЕЛ</div>
+          </div>
+
+          <div class="guide-hands" aria-hidden="true">
+            <div class="guide-hand left-hand">
+              <span class="finger pinky"></span>
+              <span class="finger ring"></span>
+              <span class="finger middle"></span>
+              <span class="finger index"></span>
+              <span class="guide-palm"></span>
+              <span class="thumb"></span>
+            </div>
+            <div class="guide-hand right-hand">
+              <span class="finger index"></span>
+              <span class="finger middle"></span>
+              <span class="finger ring"></span>
+              <span class="finger pinky"></span>
+              <span class="guide-palm"></span>
+              <span class="thumb"></span>
+            </div>
+          </div>
+
+          <div class="guide-labels">
+            <span class="left-label">Левый указательный<br><strong>на насечке А</strong></span>
+            <span class="thumb-label">Большие пальцы<br><strong>над пробелом</strong></span>
+            <span class="right-label">Правый указательный<br><strong>на насечке О</strong></span>
+          </div>
+        </div>
+
+        <div class="guide-tips">
+          <article>
+            <span>1</span>
+            <h2>Найди насечки</h2>
+            <p>Закрой глаза и легко проведи указательными пальцами по клавишам. На <strong>А</strong> и <strong>О</strong> ты почувствуешь маленькие полоски.</p>
+          </article>
+          <article>
+            <span>2</span>
+            <h2>Собери пальцы</h2>
+            <p>Остальные пальцы положи рядом на среднем ряду. Каждый палец отдыхает на своей клавише, а большие пальцы ждут над пробелом.</p>
+          </article>
+          <article>
+            <span>3</span>
+            <h2>Расслабь кисти</h2>
+            <p>Представь, что в каждой ладони лежит маленький мягкий мячик. Ты держишь его бережно: не роняешь, но и не сжимаешь.</p>
+          </article>
+        </div>
+
+        <div class="guide-finish">
+          <p>Плечи опущены, локти рядом с телом, спина ровная. Сделай спокойный вдох — теперь можно печатать.</p>
+          <button class="primary-button" id="guide-start-button" type="button">Я готов начать</button>
+        </div>
       </section>
 
       <section id="result-screen" class="screen hidden">
