@@ -18,7 +18,7 @@ npm start
 
 ```bash
 git clone <ссылка-на-репозиторий>
-cd type-mashine
+cd typing-machine
 ```
 
 Соберите и запустите приложение в фоне:

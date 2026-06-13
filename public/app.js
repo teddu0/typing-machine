@@ -138,17 +138,36 @@ function migrateVersionThreeProgress(savedProgress) {
   return { courseVersion: COURSE_VERSION, stars: Object.fromEntries(stars) };
 }
 
+function normalizeProgress(savedProgress) {
+  const savedStars = savedProgress?.stars;
+  const stars =
+    savedStars && typeof savedStars === "object" && !Array.isArray(savedStars)
+      ? Object.fromEntries(
+          Object.entries(savedStars).filter(
+            ([key, value]) =>
+              typeof key === "string" &&
+              Number.isInteger(value) &&
+              value >= 1 &&
+              value <= 3,
+          ),
+        )
+      : {};
+  return { courseVersion: COURSE_VERSION, stars };
+}
+
 function loadProgress() {
   try {
     const savedProgress = JSON.parse(
       localStorage.getItem("klavishki-progress"),
     );
-    if (savedProgress?.courseVersion === COURSE_VERSION) return savedProgress;
+    if (savedProgress?.courseVersion === COURSE_VERSION) {
+      return normalizeProgress(savedProgress);
+    }
     if (savedProgress?.courseVersion === 3) {
-      return migrateVersionThreeProgress(savedProgress);
+      return normalizeProgress(migrateVersionThreeProgress(savedProgress));
     }
     if (savedProgress?.courseVersion === 2) {
-      return {
+      return normalizeProgress({
         courseVersion: COURSE_VERSION,
         stars: Object.fromEntries(
           Object.entries(savedProgress.stars || {}).map(([id, stars]) => [
@@ -156,7 +175,7 @@ function loadProgress() {
             stars,
           ]),
         ),
-      };
+      });
     }
   } catch {
     // Начинаем новый маршрут, если сохранение повреждено.
@@ -165,7 +184,11 @@ function loadProgress() {
 }
 
 function saveProgress() {
-  localStorage.setItem("klavishki-progress", JSON.stringify(progress));
+  try {
+    localStorage.setItem("klavishki-progress", JSON.stringify(progress));
+  } catch {
+    // Приложение продолжает работать, даже если браузер запретил сохранение.
+  }
 }
 
 function showScreen(name) {
@@ -516,8 +539,17 @@ function processInput(typed) {
 }
 
 function handleKeydown(event) {
+  if (
+    screens.trainer.classList.contains("hidden") ||
+    !activeLevel ||
+    event.ctrlKey ||
+    event.altKey ||
+    event.metaKey
+  )
+    return;
+
   const typed = event.key.toLowerCase();
-  if (/^[а-я]$/i.test(event.key)) {
+  if (/^[а-яё]$/i.test(event.key)) {
     setKeyboardLayout("ru");
   } else if (
     /^[a-z]$/i.test(event.key) ||

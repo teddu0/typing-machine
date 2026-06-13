@@ -1,12 +1,12 @@
 {
-  "name": "type-mashine",
+  "name": "typing-machine",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "description": "Детский тренажёр слепой десятипальцевой печати",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check server.js && node --check data/levels.js && node --check public/app.js && node scripts/check-levels.js"
+    "check": "node --check server.js && node --check data/levels.js && node --check public/app.js && node scripts/check-levels.js && node scripts/check-client-logic.js"
   },
   "engines": {
     "node": ">=18"
