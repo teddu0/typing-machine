@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
+import { russianLayout } from "../public/keyboard-layouts.js";
+import {
+  levelKey,
+  loadProgress as loadStoredProgress,
+  normalizeProgress,
+  saveProgress,
+} from "../public/progress.js";
 
 let focusedElement = null;
 
@@ -33,6 +40,10 @@ const elements = new Map([
 ]);
 const fallbackElement = createElement();
 const storage = new Map();
+const localStorage = {
+  getItem: (key) => storage.get(key) ?? null,
+  setItem: (key, value) => storage.set(key, value),
+};
 const context = vm.createContext({
   console,
   document: {
@@ -44,15 +55,18 @@ const context = vm.createContext({
     querySelectorAll: () => [],
   },
   fetch: () => new Promise(() => {}),
-  localStorage: {
-    getItem: (key) => storage.get(key) ?? null,
-    setItem: (key, value) => storage.set(key, value),
-  },
+  levelKey,
+  loadProgress: () => loadStoredProgress(localStorage),
+  localStorage,
+  normalizeProgress,
+  persistProgress: (progress) => saveProgress(progress, localStorage),
+  russianLayout,
   setTimeout,
   window: { scrollTo() {} },
 });
 
-const appSource = readFileSync(new URL("../public/app.js", import.meta.url), "utf8");
+const appSource = readFileSync(new URL("../public/app.js", import.meta.url), "utf8")
+  .replace(/^import[\s\S]*?from ".*";\r?\n/gm, "");
 vm.runInContext(appSource, context);
 
 function evaluate(expression) {
@@ -81,11 +95,11 @@ assert.deepEqual(
   "Повреждённое актуальное сохранение не должно ломать приложение",
 );
 
-context.localStorage.setItem = () => {
+localStorage.setItem = () => {
   throw new Error("Storage disabled");
 };
 assert.doesNotThrow(
-  () => evaluate("saveProgress()"),
+  () => evaluate("persistProgress(progress)"),
   "Запрет localStorage не должен ломать приложение",
 );
 

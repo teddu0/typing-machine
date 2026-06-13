@@ -6,7 +6,7 @@
   "description": "Детский тренажёр слепой десятипальцевой печати",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check server.js && node --check data/levels.js && node --check public/app.js && node scripts/check-levels.js && node scripts/check-client-logic.js"
+    "check": "node --check server.js && node --check data/levels.js && node --check public/app.js && node --check public/keyboard-layouts.js && node --check public/progress.js && node scripts/check-levels.js && node scripts/check-client-logic.js"
   },
   "engines": {
     "node": ">=18"

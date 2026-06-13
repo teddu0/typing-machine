@@ -1,108 +1,19 @@
+import { russianLayout } from "./keyboard-layouts.js";
+import {
+  levelKey,
+  loadProgress,
+  saveProgress as persistProgress,
+} from "./progress.js";
+
 // Включите для тестирования всех курсов и занятий без прохождения предыдущих.
 const isFullAccess = false;
 
-const KEYBOARD_ROWS = [
-  ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
-  ["й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з", "х", "ъ"],
-  ["ф", "ы", "в", "а", "п", "р", "о", "л", "д", "ж", "э"],
-  ["я", "ч", "с", "м", "и", "т", "ь", "б", "ю"],
-];
-const TRAINABLE_CHARACTERS = new Set([...KEYBOARD_ROWS.flat(), " "]);
-
-const RUSSIAN_KEY_CODES = new Set([
-  "Backquote",
-  "KeyQ",
-  "KeyW",
-  "KeyE",
-  "KeyR",
-  "KeyT",
-  "KeyY",
-  "KeyU",
-  "KeyI",
-  "KeyO",
-  "KeyP",
-  "BracketLeft",
-  "BracketRight",
-  "KeyA",
-  "KeyS",
-  "KeyD",
-  "KeyF",
-  "KeyG",
-  "KeyH",
-  "KeyJ",
-  "KeyK",
-  "KeyL",
-  "Semicolon",
-  "Quote",
-  "KeyZ",
-  "KeyX",
-  "KeyC",
-  "KeyV",
-  "KeyB",
-  "KeyN",
-  "KeyM",
-  "Comma",
-  "Period",
-]);
-const COURSE_VERSION = 4;
-const FINGERS = {
-  1: "Мизинец левой руки",
-  2: "Безымянный палец левой руки",
-  3: "Средний палец левой руки",
-  4: "Указательный палец левой руки",
-  5: "Указательный палец левой руки",
-  6: "Указательный палец правой руки",
-  7: "Указательный палец правой руки",
-  8: "Средний палец правой руки",
-  9: "Безымянный палец правой руки",
-  0: "Мизинец правой руки",
-  й: "Мизинец левой руки",
-  ц: "Безымянный палец левой руки",
-  у: "Средний палец левой руки",
-  к: "Указательный палец левой руки",
-  е: "Указательный палец левой руки",
-  н: "Указательный палец правой руки",
-  г: "Указательный палец правой руки",
-  ш: "Средний палец правой руки",
-  щ: "Безымянный палец правой руки",
-  з: "Мизинец правой руки",
-  х: "Мизинец правой руки",
-  ъ: "Мизинец правой руки",
-  ф: "Мизинец левой руки",
-  ы: "Безымянный палец левой руки",
-  в: "Средний палец левой руки",
-  а: "Указательный палец левой руки",
-  п: "Указательный палец левой руки",
-  р: "Указательный палец правой руки",
-  о: "Указательный палец правой руки",
-  л: "Средний палец правой руки",
-  д: "Безымянный палец правой руки",
-  ж: "Мизинец правой руки",
-  э: "Мизинец правой руки",
-  я: "Мизинец левой руки",
-  ч: "Безымянный палец левой руки",
-  с: "Средний палец левой руки",
-  м: "Указательный палец левой руки",
-  и: "Указательный палец левой руки",
-  т: "Указательный палец правой руки",
-  ь: "Указательный палец правой руки",
-  б: "Средний палец правой руки",
-  ю: "Безымянный палец правой руки",
-  " ": "Большой палец — пробел",
-};
-const FINGER_IDS = {
-  1: "left-pinky", 2: "left-ring", 3: "left-middle", 4: "left-index", 5: "left-index",
-  6: "right-index", 7: "right-index", 8: "right-middle", 9: "right-ring", 0: "right-pinky",
-  й: "left-pinky", ц: "left-ring", у: "left-middle", к: "left-index", е: "left-index",
-  н: "right-index", г: "right-index", ш: "right-middle", щ: "right-ring",
-  з: "right-pinky", х: "right-pinky", ъ: "right-pinky",
-  ф: "left-pinky", ы: "left-ring", в: "left-middle", а: "left-index", п: "left-index",
-  р: "right-index", о: "right-index", л: "right-middle", д: "right-ring",
-  ж: "right-pinky", э: "right-pinky",
-  я: "left-pinky", ч: "left-ring", с: "left-middle", м: "left-index", и: "left-index",
-  т: "right-index", ь: "right-index", б: "right-middle", ю: "right-ring",
-  " ": "thumb",
-};
+const activeLayout = russianLayout;
+const KEYBOARD_ROWS = activeLayout.rows;
+const TRAINABLE_CHARACTERS = activeLayout.trainableCharacters;
+const PHYSICAL_LETTER_CODES = activeLayout.physicalLetterCodes;
+const FINGERS = activeLayout.fingers;
+const FINGER_IDS = activeLayout.fingerIds;
 
 const screens = {
   map: document.querySelector("#map-screen"),
@@ -120,76 +31,6 @@ let mistakes = 0;
 let wrongFlash = false;
 let keyboardLayout = "unknown";
 let progress = loadProgress();
-
-function levelKey(courseId, levelId) {
-  return `${courseId}:${levelId}`;
-}
-
-function migrateVersionThreeProgress(savedProgress) {
-  const stars = Object.entries(savedProgress.stars || {}).flatMap(
-    ([key, value]) => {
-      const [courseId, levelIdText] = key.split(":");
-      const levelId = Number(levelIdText);
-      if (courseId !== "upper") return [[key, value]];
-      if (levelId === 17) return [];
-      return [[levelKey(courseId, levelId > 17 ? levelId - 1 : levelId), value]];
-    },
-  );
-  return { courseVersion: COURSE_VERSION, stars: Object.fromEntries(stars) };
-}
-
-function normalizeProgress(savedProgress) {
-  const savedStars = savedProgress?.stars;
-  const stars =
-    savedStars && typeof savedStars === "object" && !Array.isArray(savedStars)
-      ? Object.fromEntries(
-          Object.entries(savedStars).filter(
-            ([key, value]) =>
-              typeof key === "string" &&
-              Number.isInteger(value) &&
-              value >= 1 &&
-              value <= 3,
-          ),
-        )
-      : {};
-  return { courseVersion: COURSE_VERSION, stars };
-}
-
-function loadProgress() {
-  try {
-    const savedProgress = JSON.parse(
-      localStorage.getItem("klavishki-progress"),
-    );
-    if (savedProgress?.courseVersion === COURSE_VERSION) {
-      return normalizeProgress(savedProgress);
-    }
-    if (savedProgress?.courseVersion === 3) {
-      return normalizeProgress(migrateVersionThreeProgress(savedProgress));
-    }
-    if (savedProgress?.courseVersion === 2) {
-      return normalizeProgress({
-        courseVersion: COURSE_VERSION,
-        stars: Object.fromEntries(
-          Object.entries(savedProgress.stars || {}).map(([id, stars]) => [
-            `middle:${id}`,
-            stars,
-          ]),
-        ),
-      });
-    }
-  } catch {
-    // Начинаем новый маршрут, если сохранение повреждено.
-  }
-  return { courseVersion: COURSE_VERSION, stars: {} };
-}
-
-function saveProgress() {
-  try {
-    localStorage.setItem("klavishki-progress", JSON.stringify(progress));
-  } catch {
-    // Приложение продолжает работать, даже если браузер запретил сохранение.
-  }
-}
 
 function showScreen(name) {
   Object.entries(screens).forEach(([key, screen]) =>
@@ -500,7 +341,7 @@ function finishLevel() {
   const stars = accuracy >= 95 ? 3 : accuracy >= 80 ? 2 : 1;
   const key = levelKey(activeCourse.id, activeLevel.id);
   progress.stars[key] = Math.max(progress.stars[key] || 0, stars);
-  saveProgress();
+  persistProgress(progress);
   renderMap();
 
   document.querySelector("#result-stars").textContent =
@@ -563,11 +404,11 @@ function handleKeydown(event) {
     return;
 
   const typed = event.key.toLowerCase();
-  if (/^[а-яё]$/i.test(event.key)) {
+  if (activeLayout.isLetter(event.key)) {
     setKeyboardLayout("ru");
   } else if (
     /^[a-z]$/i.test(event.key) ||
-    (RUSSIAN_KEY_CODES.has(event.code) && !TRAINABLE_CHARACTERS.has(typed))
+    (PHYSICAL_LETTER_CODES.has(event.code) && !TRAINABLE_CHARACTERS.has(typed))
   ) {
     event.preventDefault();
     setKeyboardLayout("en");
