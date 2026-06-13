@@ -826,7 +826,13 @@ h1 span { color: var(--purple); }
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-.guide-finger-status strong { color: var(--purple-dark); font-size: 18px; }
+.guide-finger-status strong {
+  min-height: 2.5em;
+  display: grid;
+  place-items: center;
+  color: var(--purple-dark);
+  font-size: 18px;
+}
 
 .guide-tips {
   display: grid;
@@ -933,6 +939,7 @@ h1 span { color: var(--purple); }
   .result-actions { flex-direction: column-reverse; }
   .guide-hands { display: none; }
   .guide-finger-status { margin-top: 22px; }
+  .guide-finger-status strong { min-height: 3.8em; }
   .guide-tips { grid-template-columns: 1fr; }
   .guide-finish { align-items: stretch; flex-direction: column; }
   .guide-key-row { gap: 3px; }
