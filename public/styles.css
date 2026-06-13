@@ -913,6 +913,71 @@ h1 span { color: var(--purple); }
   .guide-space { width: 70%; height: 48px; }
 }
 
+@media (max-height: 1000px) and (min-width: 700px) {
+  .site-header { padding: 14px 0; }
+
+  #trainer-screen .back-button { margin: 4px 0 16px; }
+  #trainer-screen .lesson-heading { gap: 20px; }
+  #trainer-screen .lesson-heading h1 { margin-bottom: 6px; font-size: 38px; }
+  #trainer-screen .lesson-heading p:not(.eyebrow) { margin-bottom: 0; font-size: 16px; }
+  #trainer-screen .lesson-status { gap: 8px; }
+  #trainer-screen .layout-status,
+  #trainer-screen .lesson-score {
+    min-width: 104px;
+    padding: 12px 14px;
+    border-radius: 16px;
+  }
+  #trainer-screen .layout-status span,
+  #trainer-screen .lesson-score span { margin-bottom: 4px; }
+  #trainer-screen .layout-status strong,
+  #trainer-screen .lesson-score strong { font-size: 22px; }
+
+  #trainer-screen .typing-card {
+    margin-top: 18px;
+    padding: 26px 30px;
+    border-radius: 24px;
+  }
+  #trainer-screen .typing-text {
+    min-height: 82px;
+    font-size: clamp(30px, 3.6vw, 40px);
+    line-height: 1.45;
+  }
+  #trainer-screen .layout-warning { margin-top: 14px; padding: 12px 16px; }
+  #trainer-screen .message { min-height: 22px; margin-top: 12px; }
+  #trainer-screen .hands-hint { margin: 18px auto 10px; padding: 7px 15px; }
+  #trainer-screen .keyboard { gap: 9px; padding: 4px 0 8px; }
+  #trainer-screen .key {
+    width: clamp(26px, 5.4vw, 60px);
+    border-radius: 13px;
+    box-shadow: 0 5px 0 #ddd8ca;
+    font-size: clamp(14px, 2vw, 21px);
+  }
+  #trainer-screen .key.active { box-shadow: 0 5px 0 var(--purple-dark); }
+  #trainer-screen .space-key {
+    width: min(330px, 62vw);
+    height: 58px;
+    font-size: 13px;
+  }
+  #trainer-screen .space-key span { font-size: 23px; }
+}
+
+@media (max-height: 760px) and (min-width: 700px) {
+  .site-header { padding: 6px 0; }
+  .site-header .brand-mark { width: 36px; height: 36px; }
+  .site-header .guide-button,
+  .site-header .total-stars { min-height: 36px; padding-top: 5px; padding-bottom: 5px; }
+
+  #trainer-screen .back-button { margin-bottom: 6px; }
+  #trainer-screen .lesson-heading h1 { font-size: 26px; }
+  #trainer-screen .lesson-heading p:not(.eyebrow) { display: none; }
+  #trainer-screen .typing-card { margin-top: 8px; padding: 12px 18px; }
+  #trainer-screen .typing-text { min-height: 44px; font-size: 25px; }
+  #trainer-screen .hands-hint { margin-top: 8px; }
+  #trainer-screen .keyboard { gap: 5px; }
+  #trainer-screen .key { width: clamp(26px, 4vw, 44px); }
+  #trainer-screen .space-key { height: 42px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .guide-hand,
   .guide-key-row .guide-home-key,
