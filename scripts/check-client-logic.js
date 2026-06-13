@@ -87,6 +87,21 @@ assert.deepEqual(
   { "middle:1": 3 },
   "Некорректные значения звёзд должны отбрасываться",
 );
+assert.equal(
+  russianLayout.fingerColorClasses["ф"],
+  russianLayout.fingerColorClasses["ж"],
+  "Клавиши левого и правого мизинцев должны иметь общий цвет",
+);
+assert.equal(
+  russianLayout.fingerColorClasses["а"],
+  russianLayout.fingerColorClasses["о"],
+  "Опорные клавиши указательных пальцев должны иметь общий цвет",
+);
+assert.notEqual(
+  russianLayout.fingerColorClasses["а"],
+  russianLayout.fingerColorClasses["в"],
+  "Разные пальцы должны иметь разные цвета",
+);
 
 storage.set("klavishki-progress", JSON.stringify({ courseVersion: 4 }));
 assert.deepEqual(

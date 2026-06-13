@@ -14,6 +14,7 @@ const TRAINABLE_CHARACTERS = activeLayout.trainableCharacters;
 const PHYSICAL_LETTER_CODES = activeLayout.physicalLetterCodes;
 const FINGERS = activeLayout.fingers;
 const FINGER_IDS = activeLayout.fingerIds;
+const FINGER_COLOR_CLASSES = activeLayout.fingerColorClasses;
 
 const screens = {
   map: document.querySelector("#map-screen"),
@@ -216,7 +217,7 @@ function renderTrainer() {
 
 function createKey(character) {
   const key = document.createElement("button");
-  key.className = `key${character === "а" || character === "о" ? " home" : ""}`;
+  key.className = `key ${FINGER_COLOR_CLASSES[character]}${character === "а" || character === "о" ? " home" : ""}`;
   key.type = "button";
   key.dataset.key = character;
   key.textContent = character.toUpperCase();
@@ -285,7 +286,7 @@ function renderGuideKeyboard() {
     rowElement.className = `guide-key-row guide-row-${rowIndex + 1}`;
     row.forEach((character) => {
       const key = document.createElement("button");
-      key.className = `guide-key${character === "а" || character === "о" ? " guide-home-key" : ""}`;
+      key.className = `guide-key ${FINGER_COLOR_CLASSES[character]}${character === "а" || character === "о" ? " guide-home-key" : ""}`;
       key.type = "button";
       key.dataset.key = character;
       key.textContent = character.toUpperCase();
@@ -297,7 +298,7 @@ function renderGuideKeyboard() {
   });
 
   const space = document.createElement("button");
-  space.className = "guide-key guide-space";
+  space.className = `guide-key guide-space ${FINGER_COLOR_CLASSES[" "]}`;
   space.type = "button";
   space.dataset.key = " ";
   space.textContent = "ПРОБЕЛ";
@@ -321,7 +322,7 @@ function renderKeyboard() {
   });
 
   const space = document.createElement("button");
-  space.className = "key space-key";
+  space.className = `key space-key ${FINGER_COLOR_CLASSES[" "]}`;
   space.type = "button";
   space.dataset.key = " ";
   space.innerHTML = '<span aria-hidden="true">▭</span><strong>ПРОБЕЛ</strong>';

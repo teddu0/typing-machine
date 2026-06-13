@@ -101,6 +101,13 @@ const FINGER_IDS = {
   " ": "thumb",
 };
 
+const FINGER_COLOR_CLASSES = Object.fromEntries(
+  Object.entries(FINGER_IDS).map(([character, fingerId]) => {
+    const fingerType = fingerId.replace(/^(left|right)-/, "");
+    return [character, `finger-${fingerType}`];
+  }),
+);
+
 const russianLayout = {
   id: "ru",
   rows: RUSSIAN_KEYBOARD_ROWS,
@@ -108,6 +115,7 @@ const russianLayout = {
   physicalLetterCodes: RUSSIAN_KEY_CODES,
   fingers: FINGERS,
   fingerIds: FINGER_IDS,
+  fingerColorClasses: FINGER_COLOR_CLASSES,
   isLetter: (character) => /^[а-яё]$/i.test(character),
 };
 

@@ -417,6 +417,8 @@ h1 span { color: var(--purple); }
 }
 
 .key {
+  --key-color: white;
+  --key-shadow: #ddd8ca;
   width: clamp(26px, 6.2vw, 64px);
   aspect-ratio: 1;
   display: grid;
@@ -424,13 +426,18 @@ h1 span { color: var(--purple); }
   border: 0;
   border-radius: clamp(7px, 1.3vw, 15px);
   color: var(--ink);
-  background: white;
-  box-shadow: 0 6px 0 #ddd8ca;
+  background: var(--key-color);
+  box-shadow: 0 6px 0 var(--key-shadow);
   font-size: clamp(13px, 2.5vw, 22px);
   font-weight: 900;
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
 }
+.finger-pinky { --key-color: #e8f7dd; --key-shadow: #bfdba9; }
+.finger-ring { --key-color: #fff8cf; --key-shadow: #e4d991; }
+.finger-middle { --key-color: #e1f3f8; --key-shadow: #acd1dc; }
+.finger-index { --key-color: #ffeadb; --key-shadow: #dfb99e; }
+.finger-thumb { --key-color: #f4f1ff; --key-shadow: #d4ccef; }
 .key.home {
   position: relative;
   border: 3px solid #cbc2ff;
@@ -453,7 +460,7 @@ h1 span { color: var(--purple); }
   background: white;
 }
 .key.active { color: white; background: var(--purple); box-shadow: 0 6px 0 var(--purple-dark); transform: translateY(-3px); }
-.key:active { transform: translateY(4px); box-shadow: 0 2px 0 #ddd8ca; }
+.key:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--key-shadow); }
 .key.active:active { box-shadow: 0 2px 0 var(--purple-dark); }
 
 .space-key {
@@ -534,6 +541,8 @@ h1 span { color: var(--purple); }
 .guide-row-4 { transform: translateX(-4px); }
 
 .guide-key {
+  --key-color: white;
+  --key-shadow: #d9d5ca;
   position: relative;
   width: clamp(27px, 5.8vw, 58px);
   aspect-ratio: 1;
@@ -542,8 +551,8 @@ h1 span { color: var(--purple); }
   border: 0;
   border-radius: clamp(7px, 1.2vw, 13px);
   color: var(--ink);
-  background: white;
-  box-shadow: 0 6px 0 #d9d5ca;
+  background: var(--key-color);
+  box-shadow: 0 6px 0 var(--key-shadow);
   font-size: clamp(13px, 2.2vw, 20px);
   font-weight: 900;
   cursor: pointer;
@@ -583,8 +592,8 @@ h1 span { color: var(--purple); }
   place-items: center;
   border-radius: 16px;
   color: var(--muted);
-  background: white;
-  box-shadow: 0 6px 0 #d9d5ca;
+  background: var(--key-color);
+  box-shadow: 0 6px 0 var(--key-shadow);
   font-size: 13px;
   font-weight: 900;
 }
@@ -927,7 +936,7 @@ h1 span { color: var(--purple); }
   #trainer-screen .key {
     width: clamp(26px, 5.4vw, 60px);
     border-radius: 13px;
-    box-shadow: 0 5px 0 #ddd8ca;
+    box-shadow: 0 5px 0 var(--key-shadow);
     font-size: clamp(14px, 2vw, 21px);
   }
   #trainer-screen .key.active { box-shadow: 0 5px 0 var(--purple-dark); }
