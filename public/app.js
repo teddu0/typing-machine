@@ -234,8 +234,8 @@ function clearGuideReach() {
   document.querySelectorAll(".guide-key.reached").forEach((key) => key.classList.remove("reached"));
   document.querySelectorAll("[data-finger].reaching").forEach((finger) => {
     finger.classList.remove("reaching");
-    finger.style.removeProperty("--reach-x");
-    finger.style.removeProperty("--reach-y");
+    finger.style.removeProperty("--reach-angle");
+    finger.style.removeProperty("--reach-height");
   });
   document.querySelectorAll(".guide-hand.active").forEach((hand) => hand.classList.remove("active"));
   document.querySelector("#guide-finger-status").innerHTML =
@@ -250,11 +250,23 @@ function showGuideReach(key, character) {
   const keyRect = key.getBoundingClientRect();
 
   fingers.forEach((finger) => {
-    const fingerRect = finger.getBoundingClientRect();
-    const reachX = keyRect.left + keyRect.width / 2 - (fingerRect.left + fingerRect.width / 2);
-    const reachY = keyRect.top + keyRect.height / 2 - (fingerRect.top + 12);
-    finger.style.setProperty("--reach-x", `${reachX}px`);
-    finger.style.setProperty("--reach-y", `${reachY}px`);
+    const hand = finger.closest(".guide-hand");
+    const handRect = hand.getBoundingClientRect();
+    const scaleX = handRect.width / hand.offsetWidth;
+    const scaleY = handRect.height / hand.offsetHeight;
+    const baseX =
+      handRect.left + (finger.offsetLeft + finger.offsetWidth / 2) * scaleX;
+    const baseY =
+      handRect.top + (finger.offsetTop + finger.offsetHeight) * scaleY;
+    const targetX = keyRect.left + keyRect.width / 2;
+    const targetY = keyRect.top + keyRect.height / 2;
+    const deltaX = targetX - baseX;
+    const deltaY = targetY - baseY;
+    const distance = Math.hypot(deltaX, deltaY);
+    const angle = Math.atan2(deltaX, -deltaY) * (180 / Math.PI);
+    const reachHeight = Math.max(finger.offsetHeight * 0.72, distance / scaleY);
+    finger.style.setProperty("--reach-angle", `${angle}deg`);
+    finger.style.setProperty("--reach-height", `${reachHeight}px`);
     finger.classList.add("reaching");
     finger.setAttribute("aria-label", finger.dataset.name);
     finger.closest(".guide-hand").classList.add("active");
