@@ -15,6 +15,7 @@
         <span>Клавишки</span>
       </button>
       <div class="header-actions">
+        <button class="account-button" id="account-button" type="button">Войти</button>
         <button class="guide-button" id="guide-button" type="button">
           <span aria-hidden="true">?</span>
           Как поставить руки
@@ -161,6 +162,38 @@
         </div>
       </section>
     </main>
+
+    <dialog class="account-dialog" id="account-dialog">
+      <button class="account-close" id="account-close" type="button" aria-label="Закрыть">×</button>
+      <div id="account-forms" class="account-forms">
+        <div>
+          <p class="eyebrow">Сохраним прогресс</p>
+          <h2>Создать аккаунт</h2>
+          <p>После регистрации звёзды с этого устройства перенесутся в аккаунт.</p>
+          <form id="register-form">
+            <label>Email<input name="email" type="email" autocomplete="email" required></label>
+            <label>Пароль<input name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required></label>
+            <button class="primary-button" type="submit">Зарегистрироваться</button>
+          </form>
+        </div>
+        <div>
+          <p class="eyebrow">Уже есть аккаунт</p>
+          <h2>Войти</h2>
+          <form id="login-form">
+            <label>Email<input name="email" type="email" autocomplete="email" required></label>
+            <label>Пароль<input name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required></label>
+            <button class="secondary-button" type="submit">Войти</button>
+          </form>
+        </div>
+      </div>
+      <div id="account-session" class="account-session hidden">
+        <p class="eyebrow">Вы вошли</p>
+        <h2 id="account-user"></h2>
+        <p>Прогресс сохраняется в аккаунте автоматически.</p>
+        <button class="secondary-button" id="logout-button" type="button">Выйти</button>
+      </div>
+      <p class="account-message" id="account-message" aria-live="polite"></p>
+    </dialog>
 
     <script src="/app.js" type="module"></script>
   </body>

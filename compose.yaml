@@ -2,6 +2,38 @@ services:
   app:
     build:
       context: .
+    environment:
+      DATABASE_URL: postgres://typing_machine:typing_machine@db:5432/typing_machine
+      NODE_ENV: development
+      PORT: 3000
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "3000:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
     restart: unless-stopped
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: typing_machine
+      POSTGRES_USER: typing_machine
+      POSTGRES_PASSWORD: typing_machine
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U typing_machine -d typing_machine"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

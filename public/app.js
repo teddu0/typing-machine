@@ -1,7 +1,9 @@
+import { initializeAccount, mergeServerProgress } from "./account.js";
 import { russianLayout } from "./keyboard-layouts.js";
 import {
   levelKey,
   loadProgress,
+  normalizeProgress,
   saveProgress as persistProgress,
 } from "./progress.js";
 
@@ -335,6 +337,7 @@ function finishLevel() {
   const key = levelKey(activeCourse.id, activeLevel.id);
   progress.stars[key] = Math.max(progress.stars[key] || 0, stars);
   persistProgress(progress);
+  mergeServerProgress(progress.stars).catch(() => {});
   renderMap();
 
   document.querySelector("#result-stars").textContent =
@@ -462,3 +465,19 @@ fetch("/api/courses")
     document.querySelector("#courses-container").innerHTML =
       "<p>Не получилось загрузить курсы. Попробуй обновить страницу.</p>";
   });
+
+initializeAccount({
+  onAuthenticated: async () => {
+    const serverProgress = await mergeServerProgress(progress.stars);
+    if (!serverProgress) return;
+    progress = normalizeProgress({
+      courseVersion: progress.courseVersion,
+      stars: serverProgress.stars,
+    });
+    persistProgress(progress);
+    if (courses.length) renderMap();
+  },
+  onLoggedOut: () => {
+    if (courses.length) renderMap();
+  },
+});

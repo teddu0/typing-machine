@@ -484,6 +484,57 @@ h1 span { color: var(--purple); }
   margin-bottom: 32px;
 }
 
+.account-button {
+  min-height: 42px;
+  padding: 0 15px;
+  border: 2px solid #d8d0ff;
+  border-radius: 999px;
+  color: var(--purple-dark);
+  background: white;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.account-dialog {
+  width: min(820px, calc(100% - 28px));
+  padding: 30px;
+  border: 0;
+  border-radius: 28px;
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: 0 24px 80px rgba(41, 48, 74, 0.25);
+}
+.account-dialog::backdrop { background: rgba(41, 48, 74, 0.45); }
+.account-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  color: var(--muted);
+  background: #eeebff;
+  font-size: 25px;
+  cursor: pointer;
+}
+.account-forms { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.account-forms > div { padding: 20px; border-radius: 22px; background: white; }
+.account-forms h2, .account-session h2 { margin: 0 0 10px; }
+.account-forms form { display: grid; gap: 12px; }
+.account-forms label { display: grid; gap: 6px; font-weight: 900; }
+.account-forms input {
+  min-height: 46px;
+  padding: 0 12px;
+  border: 2px solid #ddd8f8;
+  border-radius: 12px;
+  font: inherit;
+}
+.account-session { padding: 24px; text-align: center; }
+.account-session h2 { overflow-wrap: anywhere; }
+.account-message { min-height: 24px; margin: 18px 0 0; color: var(--green); font-weight: 900; text-align: center; }
+.account-message.error { color: var(--red); }
+
 #guide-screen {
   width: min(1380px, calc(100vw - 32px));
   margin-left: 50%;
@@ -922,6 +973,8 @@ h1 span { color: var(--purple); }
 @media (max-width: 520px) {
   .site-header { padding: 14px 0; }
   .header-actions { gap: 6px; }
+  .account-button { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .account-forms { grid-template-columns: 1fr; }
   .guide-button { width: 42px; padding: 0; justify-content: center; font-size: 0; }
   main { width: min(100% - 20px, 1120px); }
   .hero { padding: 28px 22px; border-radius: 24px; }
