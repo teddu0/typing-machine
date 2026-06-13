@@ -489,6 +489,12 @@ function nextAfterActive() {
     : null;
 }
 
+function focusResultAction(action = "next") {
+  document
+    .querySelector(action === "retry" ? "#retry-button" : "#next-button")
+    .focus();
+}
+
 function finishLevel() {
   const accuracy = Math.round(((attempts - mistakes) / attempts) * 100);
   const stars = accuracy >= 95 ? 3 : accuracy >= 80 ? 2 : 1;
@@ -507,6 +513,7 @@ function finishLevel() {
     ? "Следующее занятие"
     : "К карте курсов";
   showScreen("result");
+  focusResultAction();
 }
 
 function processInput(typed) {
@@ -539,12 +546,19 @@ function processInput(typed) {
 }
 
 function handleKeydown(event) {
+  if (event.ctrlKey || event.altKey || event.metaKey) return;
+
+  if (!screens.result.classList.contains("hidden")) {
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault();
+      focusResultAction(event.key === "ArrowLeft" ? "retry" : "next");
+    }
+    return;
+  }
+
   if (
     screens.trainer.classList.contains("hidden") ||
-    !activeLevel ||
-    event.ctrlKey ||
-    event.altKey ||
-    event.metaKey
+    !activeLevel
   )
     return;
 

@@ -164,6 +164,20 @@ h1 span { color: var(--purple); }
 .primary-button:hover { transform: translateY(-2px); }
 .primary-button:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--purple-dark); }
 .secondary-button { color: var(--purple-dark); background: #eeebff; }
+.result-actions button {
+  color: var(--purple-dark);
+  background: #eeebff;
+  box-shadow: none;
+}
+.result-actions button:hover { transform: none; }
+.result-actions button:focus {
+  outline: none;
+  color: white;
+  background: var(--purple);
+  box-shadow: 0 6px 0 var(--purple-dark);
+}
+.result-actions button:focus:hover { transform: translateY(-2px); }
+.result-actions button:focus:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--purple-dark); }
 
 .hero-card {
   min-height: 220px;

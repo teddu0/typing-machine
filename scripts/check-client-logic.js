@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
+let focusedElement = null;
+
 function createElement(hidden = false) {
   const classes = new Set(hidden ? ["hidden"] : []);
   return {
@@ -12,6 +14,9 @@ function createElement(hidden = false) {
       toggle: (name, force) => force ? classes.add(name) : classes.delete(name),
     },
     addEventListener() {},
+    focus() {
+      focusedElement = this;
+    },
     setAttribute() {},
     style: { setProperty() {}, removeProperty() {} },
     textContent: "",
@@ -23,6 +28,8 @@ const elements = new Map([
   ["#guide-screen", createElement(true)],
   ["#trainer-screen", createElement(true)],
   ["#result-screen", createElement(true)],
+  ["#retry-button", createElement()],
+  ["#next-button", createElement()],
 ]);
 const fallbackElement = createElement();
 const storage = new Map();
@@ -30,6 +37,9 @@ const context = vm.createContext({
   console,
   document: {
     addEventListener() {},
+    get activeElement() {
+      return focusedElement;
+    },
     querySelector: (selector) => elements.get(selector) || fallbackElement,
     querySelectorAll: () => [],
   },
@@ -107,5 +117,45 @@ event.key = "ё";
 evaluate("handleKeydown(event)");
 assert.equal(event.prevented, false, "Ё не должна считаться английской раскладкой");
 assert.equal(evaluate("keyboardLayout"), "ru", "Ё должна определять русскую раскладку");
+
+evaluate("screens.trainer.classList.add('hidden'); screens.result.classList.remove('hidden')");
+evaluate("focusResultAction()");
+assert.equal(
+  focusedElement,
+  elements.get("#next-button"),
+  "По умолчанию должна выбираться кнопка следующего занятия",
+);
+
+event.code = "ArrowLeft";
+event.key = "ArrowLeft";
+event.prevented = false;
+evaluate("handleKeydown(event)");
+assert.equal(event.prevented, true, "Стрелка влево должна перехватываться на экране результата");
+assert.equal(
+  focusedElement,
+  elements.get("#retry-button"),
+  "Стрелка влево должна выбирать кнопку повтора",
+);
+
+event.code = "ArrowRight";
+event.key = "ArrowRight";
+event.prevented = false;
+evaluate("handleKeydown(event)");
+assert.equal(event.prevented, true, "Стрелка вправо должна перехватываться на экране результата");
+assert.equal(
+  focusedElement,
+  elements.get("#next-button"),
+  "Стрелка вправо должна выбирать кнопку следующего занятия",
+);
+
+event.code = "Space";
+event.key = " ";
+event.prevented = false;
+evaluate("handleKeydown(event)");
+assert.equal(
+  event.prevented,
+  false,
+  "Пробел должен штатно нажимать выбранную кнопку результата",
+);
 
 console.log("Проверена клиентская логика прогресса и клавиатурного ввода");
