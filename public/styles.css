@@ -532,6 +532,16 @@ h1 span { color: var(--purple); }
 }
 .account-session { padding: 24px; text-align: center; }
 .account-session h2 { overflow-wrap: anywhere; }
+#logout-button {
+  color: #b4233c;
+  background: rgba(225, 67, 89, 0.12);
+  border-color: rgba(225, 67, 89, 0.28);
+}
+#logout-button:hover {
+  color: #971b31;
+  background: rgba(225, 67, 89, 0.2);
+  border-color: rgba(225, 67, 89, 0.42);
+}
 .account-message { min-height: 24px; margin: 18px 0 0; color: var(--green); font-weight: 900; text-align: center; }
 .account-message.error { color: var(--red); }
 
