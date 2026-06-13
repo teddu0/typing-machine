@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node server.js",
     "migrate": "node scripts/migrate.js",
-    "check": "node --check server.js && node --check data/levels.js && node --check public/app.js && node --check public/account.js && node --check public/keyboard-layouts.js && node --check public/progress.js && node --check server/api.js && node --check server/auth-service.js && node --check server/config.js && node --check server/db.js && node --check server/http.js && node --check server/migrate.js && node --check server/progress-service.js && node --check server/rate-limit.js && node --check server/security.js && node --check server/validation.js && node scripts/check-levels.js && node scripts/check-client-logic.js && node scripts/check-server-logic.js"
+    "check": "node --check server.js && node --check data/levels.js && node --check public/app.js && node --check public/account.js && node --check public/date-format.js && node --check public/keyboard-layouts.js && node --check public/progress.js && node --check server/api.js && node --check server/auth-service.js && node --check server/config.js && node --check server/db.js && node --check server/http.js && node --check server/migrate.js && node --check server/profile-service.js && node --check server/progress-service.js && node --check server/rate-limit.js && node --check server/security.js && node --check server/validation.js && node scripts/check-levels.js && node scripts/check-client-logic.js && node scripts/check-server-logic.js"
   },
   "engines": {
     "node": ">=18"

@@ -21,6 +21,7 @@ const FINGER_COLOR_CLASSES = activeLayout.fingerColorClasses;
 const screens = {
   map: document.querySelector("#map-screen"),
   guide: document.querySelector("#guide-screen"),
+  profile: document.querySelector("#profile-screen"),
   trainer: document.querySelector("#trainer-screen"),
   result: document.querySelector("#result-screen"),
 };
@@ -431,6 +432,9 @@ document
 document
   .querySelector("#guide-back-button")
   .addEventListener("click", () => showScreen("map"));
+document
+  .querySelector("#profile-back-button")
+  .addEventListener("click", () => showScreen("map"));
 document.querySelector("#guide-start-button").addEventListener("click", () => {
   const next = findNextLevel();
   if (next?.level) startLevel(next.course.id, next.level.id);
@@ -479,5 +483,7 @@ initializeAccount({
   },
   onLoggedOut: () => {
     if (courses.length) renderMap();
+    showScreen("map");
   },
+  onOpenProfile: () => showScreen("profile"),
 });

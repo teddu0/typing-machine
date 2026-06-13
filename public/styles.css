@@ -545,6 +545,58 @@ h1 span { color: var(--purple); }
 .account-message { min-height: 24px; margin: 18px 0 0; color: var(--green); font-weight: 900; text-align: center; }
 .account-message.error { color: var(--red); }
 
+.profile-heading {
+  margin: 20px 0 28px;
+}
+.profile-heading h1 {
+  margin: 4px 0 8px;
+  font-size: clamp(38px, 6vw, 64px);
+}
+.profile-heading p:last-child { color: var(--muted); }
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.profile-card {
+  padding: 28px;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  border-radius: 28px;
+  background: white;
+  box-shadow: var(--shadow);
+}
+.profile-card h2 { margin: 4px 0 8px; }
+.profile-card div > p:last-child { margin-bottom: 0; color: var(--muted); line-height: 1.5; }
+.profile-card label { display: grid; gap: 7px; font-weight: 900; }
+.profile-card input {
+  min-height: 48px;
+  padding: 0 13px;
+  border: 2px solid #ddd8f8;
+  border-radius: 13px;
+  font: inherit;
+}
+.profile-card input:focus {
+  border-color: var(--purple);
+  outline: 0;
+}
+.profile-message {
+  min-height: 24px;
+  margin: 0;
+  color: var(--green);
+  font-weight: 900;
+}
+.profile-message.error { color: var(--red); }
+.profile-logout {
+  margin-top: 24px;
+  padding: 22px;
+  display: flex;
+  justify-content: flex-end;
+  border-radius: 24px;
+  background: rgba(225, 67, 89, 0.07);
+}
+
 #guide-screen {
   width: min(1380px, calc(100vw - 32px));
   margin-left: 50%;
@@ -985,6 +1037,7 @@ h1 span { color: var(--purple); }
   .header-actions { gap: 6px; }
   .account-button { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .account-forms { grid-template-columns: 1fr; }
+  .profile-grid { grid-template-columns: 1fr; }
   .guide-button { width: 42px; padding: 0; justify-content: center; font-size: 0; }
   main { width: min(100% - 20px, 1120px); }
   .hero { padding: 28px 22px; border-radius: 24px; }

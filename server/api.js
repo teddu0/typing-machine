@@ -3,9 +3,10 @@ import { config } from "./config.js";
 import { findUserBySessionToken, login, logout, register, SESSION_SECONDS } from "./auth-service.js";
 import { assertSameOrigin, parseCookies, readJson, sendJson, sessionCookie } from "./http.js";
 import { getProgress, mergeProgress } from "./progress-service.js";
+import { changePassword, updateProfile } from "./profile-service.js";
 import { query } from "./db.js";
 import { assertRateLimit } from "./rate-limit.js";
-import { validateCredentials } from "./validation.js";
+import { validateCredentials, validatePasswordChange, validateProfile } from "./validation.js";
 
 function getSessionToken(request) {
   return parseCookies(request)[config.sessionCookieName];
@@ -51,7 +52,7 @@ async function handleApi(request, response, url) {
     return true;
   }
 
-  if (request.method === "POST") assertSameOrigin(request);
+  if (request.method !== "GET") assertSameOrigin(request);
 
   if (request.method === "POST" && url.pathname === "/api/auth/register") {
     assertRateLimit(authRateLimitKey(request, "register"));
@@ -72,6 +73,27 @@ async function handleApi(request, response, url) {
   if (request.method === "POST" && url.pathname === "/api/auth/logout") {
     await logout(getSessionToken(request));
     sendJson(response, 200, { user: null }, { "Set-Cookie": cookieHeader("", 0) });
+    return true;
+  }
+
+  if (request.method === "PATCH" && url.pathname === "/api/profile") {
+    const user = await requireUser(request);
+    const profile = validateProfile(await readJson(request));
+    sendJson(response, 200, { user: await updateProfile(user.id, profile) });
+    return true;
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/profile/password") {
+    const user = await requireUser(request);
+    assertRateLimit(authRateLimitKey(request, "password"));
+    const passwords = validatePasswordChange(await readJson(request));
+    await changePassword(
+      user.id,
+      getSessionToken(request),
+      passwords.currentPassword,
+      passwords.newPassword,
+    );
+    sendJson(response, 200, { status: "ok" });
     return true;
   }
 

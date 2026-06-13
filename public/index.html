@@ -149,6 +149,53 @@
         </div>
       </section>
 
+      <section id="profile-screen" class="screen hidden">
+        <button class="back-button" id="profile-back-button" type="button">← К карте курсов</button>
+        <div class="profile-heading">
+          <p class="eyebrow">Личный кабинет</p>
+          <h1>Мой профиль</h1>
+          <p>Email аккаунта: <strong id="profile-email"></strong></p>
+        </div>
+        <div class="profile-grid">
+          <form class="profile-card" id="profile-form">
+            <div>
+              <p class="eyebrow">О себе</p>
+              <h2>Данные профиля</h2>
+              <p>Эти поля необязательны. Имя будет отображаться в интерфейсе вместо email.</p>
+            </div>
+            <label>Имя
+              <input id="profile-display-name" name="displayName" type="text" autocomplete="name" minlength="2" maxlength="40" placeholder="Как к вам обращаться">
+            </label>
+            <label>Дата рождения
+              <input id="profile-birth-date" name="birthDate" type="text" inputmode="numeric" autocomplete="bday" maxlength="10" placeholder="ДД.ММ.ГГГГ" pattern="\d{2}\.\d{2}\.\d{4}">
+            </label>
+            <label>Телефон
+              <input id="profile-phone" name="phone" type="tel" autocomplete="tel" maxlength="24" placeholder="+7 999 123-45-67">
+            </label>
+            <button class="primary-button" type="submit">Сохранить профиль</button>
+            <p class="profile-message" id="profile-message" data-message-class="profile-message" aria-live="polite"></p>
+          </form>
+          <form class="profile-card" id="password-form">
+            <div>
+              <p class="eyebrow">Безопасность</p>
+              <h2>Изменить пароль</h2>
+              <p>После изменения пароля вход на остальных устройствах будет завершён.</p>
+            </div>
+            <label>Текущий пароль
+              <input name="currentPassword" type="password" autocomplete="current-password" minlength="8" maxlength="128" required>
+            </label>
+            <label>Новый пароль
+              <input name="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required>
+            </label>
+            <button class="secondary-button" type="submit">Изменить пароль</button>
+            <p class="profile-message" id="password-message" data-message-class="profile-message" aria-live="polite"></p>
+          </form>
+        </div>
+        <div class="profile-logout">
+          <button class="secondary-button" id="logout-button" type="button">Выйти из аккаунта</button>
+        </div>
+      </section>
+
       <section id="result-screen" class="screen hidden">
         <div class="result-card">
           <div class="result-stars" id="result-stars">★★★</div>
@@ -190,9 +237,9 @@
         <p class="eyebrow">Вы вошли</p>
         <h2 id="account-user"></h2>
         <p>Прогресс сохраняется в аккаунте автоматически.</p>
-        <button class="secondary-button" id="logout-button" type="button">Выйти</button>
+        <button class="primary-button" id="profile-open-button" type="button">Перейти в профиль</button>
       </div>
-      <p class="account-message" id="account-message" aria-live="polite"></p>
+      <p class="account-message" id="account-message" data-message-class="account-message" aria-live="polite"></p>
     </dialog>
 
     <script src="/app.js" type="module"></script>

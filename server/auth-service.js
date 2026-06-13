@@ -11,7 +11,13 @@ import {
 const SESSION_SECONDS = config.sessionDays * 24 * 60 * 60;
 
 function publicUser(user) {
-  return { id: user.id, email: user.email };
+  return {
+    id: user.id,
+    email: user.email,
+    displayName: user.display_name || null,
+    birthDate: user.birth_date || null,
+    phone: user.phone || null,
+  };
 }
 
 async function createSession(client, userId) {
@@ -40,7 +46,7 @@ async function register(email, password) {
     const userResult = await client.query(
       `INSERT INTO users (id, email, password_hash)
        VALUES ($1, $2, $3)
-       RETURNING id, email`,
+       RETURNING id, email, display_name, birth_date, phone`,
       [randomUUID(), email, await hashPassword(password)],
     );
     const user = userResult.rows[0];
@@ -50,7 +56,8 @@ async function register(email, password) {
 
 async function login(email, password) {
   const result = await query(
-    "SELECT id, email, password_hash FROM users WHERE lower(email) = lower($1)",
+    `SELECT id, email, password_hash, display_name, birth_date, phone
+     FROM users WHERE lower(email) = lower($1)`,
     [email],
   );
   const user = result.rows[0];
@@ -69,7 +76,7 @@ async function login(email, password) {
 async function findUserBySessionToken(token) {
   if (!token) return null;
   const result = await query(
-    `SELECT users.id, users.email
+    `SELECT users.id, users.email, users.display_name, users.birth_date, users.phone
      FROM sessions
      JOIN users ON users.id = sessions.user_id
      WHERE sessions.token_hash = $1 AND sessions.expires_at > now()`,
@@ -83,4 +90,4 @@ async function logout(token) {
   await query("DELETE FROM sessions WHERE token_hash = $1", [hashSessionToken(token)]);
 }
 
-export { findUserBySessionToken, login, logout, register, SESSION_SECONDS };
+export { findUserBySessionToken, login, logout, publicUser, register, SESSION_SECONDS };

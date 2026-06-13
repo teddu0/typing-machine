@@ -1,6 +1,9 @@
+import { formatBirthDateInput, formatIsoDate, parseRussianDate } from "./date-format.js";
+
 let currentUser = null;
 let onAuthenticated = async () => {};
 let onLoggedOut = () => {};
+let onOpenProfile = () => {};
 
 async function apiRequest(path, options = {}) {
   const response = await fetch(path, {
@@ -13,18 +16,27 @@ async function apiRequest(path, options = {}) {
   return body;
 }
 
-function renderAccount() {
-  const button = document.querySelector("#account-button");
-  button.textContent = currentUser ? currentUser.email : "Войти";
-  document.querySelector("#account-user").textContent = currentUser?.email || "";
-  document.querySelector("#account-forms").classList.toggle("hidden", Boolean(currentUser));
-  document.querySelector("#account-session").classList.toggle("hidden", !currentUser);
+function accountLabel() {
+  return currentUser?.displayName || currentUser?.email || "Войти";
 }
 
-function showMessage(message, isError = false) {
-  const element = document.querySelector("#account-message");
+function renderAccount() {
+  document.querySelector("#account-button").textContent = accountLabel();
+  document.querySelector("#account-user").textContent = accountLabel();
+  document.querySelector("#account-forms").classList.toggle("hidden", Boolean(currentUser));
+  document.querySelector("#account-session").classList.toggle("hidden", !currentUser);
+
+  if (!currentUser) return;
+  document.querySelector("#profile-email").textContent = currentUser.email;
+  document.querySelector("#profile-display-name").value = currentUser.displayName || "";
+  document.querySelector("#profile-birth-date").value = formatIsoDate(currentUser.birthDate);
+  document.querySelector("#profile-phone").value = currentUser.phone || "";
+}
+
+function showMessage(message, isError = false, target = "#account-message") {
+  const element = document.querySelector(target);
   element.textContent = message;
-  element.className = `account-message${isError ? " error" : ""}`;
+  element.className = `${element.dataset.messageClass}${isError ? " error" : ""}`;
 }
 
 async function submitCredentials(event, path) {
@@ -54,31 +66,93 @@ async function submitCredentials(event, path) {
   }
 }
 
+async function logout() {
+  try {
+    await apiRequest("/api/auth/logout", { method: "POST", body: "{}" });
+    currentUser = null;
+    renderAccount();
+    onLoggedOut();
+    document.querySelector("#account-dialog").close();
+  } catch (error) {
+    showMessage(error.message, true, "#profile-message");
+  }
+}
+
+async function updateProfile(event) {
+  event.preventDefault();
+  const data = new FormData(event.currentTarget);
+  showMessage("Сохраняем…", false, "#profile-message");
+  try {
+    const result = await apiRequest("/api/profile", {
+      method: "PATCH",
+      body: JSON.stringify({
+        displayName: data.get("displayName"),
+        birthDate: parseRussianDate(data.get("birthDate")),
+        phone: data.get("phone"),
+      }),
+    });
+    currentUser = result.user;
+    renderAccount();
+    showMessage("Профиль сохранён.", false, "#profile-message");
+  } catch (error) {
+    showMessage(error.message, true, "#profile-message");
+  }
+}
+
+async function updatePassword(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const data = new FormData(form);
+  showMessage("Меняем пароль…", false, "#password-message");
+  try {
+    await apiRequest("/api/profile/password", {
+      method: "POST",
+      body: JSON.stringify({
+        currentPassword: data.get("currentPassword"),
+        newPassword: data.get("newPassword"),
+      }),
+    });
+    form.reset();
+    showMessage("Пароль изменён. Остальные сессии завершены.", false, "#password-message");
+  } catch (error) {
+    showMessage(error.message, true, "#password-message");
+  }
+}
+
+function openProfile() {
+  document.querySelector("#account-dialog").close();
+  showMessage("", false, "#profile-message");
+  showMessage("", false, "#password-message");
+  renderAccount();
+  onOpenProfile();
+}
+
 async function initializeAccount(callbacks = {}) {
   onAuthenticated = callbacks.onAuthenticated || onAuthenticated;
   onLoggedOut = callbacks.onLoggedOut || onLoggedOut;
+  onOpenProfile = callbacks.onOpenProfile || onOpenProfile;
 
   const dialog = document.querySelector("#account-dialog");
   document.querySelector("#account-button").addEventListener("click", () => {
+    if (currentUser) {
+      openProfile();
+      return;
+    }
     showMessage("");
     dialog.showModal();
   });
   document.querySelector("#account-close").addEventListener("click", () => dialog.close());
+  document.querySelector("#profile-open-button").addEventListener("click", openProfile);
   document.querySelector("#register-form").addEventListener("submit", (event) =>
     submitCredentials(event, "/api/auth/register"));
   document.querySelector("#login-form").addEventListener("submit", (event) =>
     submitCredentials(event, "/api/auth/login"));
-  document.querySelector("#logout-button").addEventListener("click", async () => {
-    try {
-      await apiRequest("/api/auth/logout", { method: "POST", body: "{}" });
-      currentUser = null;
-      renderAccount();
-      onLoggedOut();
-      dialog.close();
-    } catch (error) {
-      showMessage(error.message, true);
-    }
+  document.querySelector("#profile-form").addEventListener("submit", updateProfile);
+  document.querySelector("#profile-birth-date").addEventListener("input", (event) => {
+    event.currentTarget.value = formatBirthDateInput(event.currentTarget.value);
   });
+  document.querySelector("#password-form").addEventListener("submit", updatePassword);
+  document.querySelector("#logout-button").addEventListener("click", logout);
 
   try {
     const result = await apiRequest("/api/auth/me");

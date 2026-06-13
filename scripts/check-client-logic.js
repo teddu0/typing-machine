@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import { russianLayout } from "../public/keyboard-layouts.js";
+import { formatBirthDateInput, formatIsoDate, parseRussianDate } from "../public/date-format.js";
 import {
   levelKey,
   loadProgress as loadStoredProgress,
@@ -10,6 +11,14 @@ import {
 } from "../public/progress.js";
 
 let focusedElement = null;
+
+assert.equal(formatIsoDate("2015-06-13"), "13.06.2015");
+assert.equal(formatBirthDateInput("13062015"), "13.06.2015");
+assert.equal(formatBirthDateInput("13.06.2015"), "13.06.2015");
+assert.equal(parseRussianDate("13.06.2015"), "2015-06-13");
+assert.equal(parseRussianDate(""), "");
+assert.throws(() => parseRussianDate("2015-06-13"), /ДД\.ММ\.ГГГГ/);
+assert.throws(() => parseRussianDate("30.02.2015"), /корректную дату/);
 
 function createElement(hidden = false) {
   const classes = new Set(hidden ? ["hidden"] : []);
