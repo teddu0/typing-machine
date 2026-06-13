@@ -30,6 +30,11 @@ npm start
 
 Затем откройте [http://localhost:3000](http://localhost:3000).
 
+Интерактивная документация backend API доступна в Swagger UI:
+[http://localhost:3000/api/swagger](http://localhost:3000/api/swagger).
+OpenAPI-схема доступна по адресу
+[http://localhost:3000/api/openapi.json](http://localhost:3000/api/openapi.json).
+
 ## Запуск через Docker на другом компьютере
 
 На компьютере должны быть установлены Git, Docker и Docker Compose.

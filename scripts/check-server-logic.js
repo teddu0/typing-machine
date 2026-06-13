@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { hashPassword, verifyPassword } from "../server/security.js";
+import { openapi } from "../server/openapi.js";
 import { normalizeStars } from "../server/progress-service.js";
 import {
   normalizeEmail,
@@ -64,6 +65,11 @@ const passwordHash = await hashPassword("correct horse battery staple");
 assert.notEqual(passwordHash, "correct horse battery staple");
 assert.equal(await verifyPassword("correct horse battery staple", passwordHash), true);
 assert.equal(await verifyPassword("wrong password", passwordHash), false);
+assert.equal(openapi.openapi, "3.1.0");
+assert.ok(openapi.paths["/api/auth/register"].post);
+assert.ok(openapi.paths["/api/profile"].patch);
+assert.ok(openapi.paths["/api/progress/merge"].post);
+assert.ok(openapi.components.securitySchemes.sessionCookie);
 assert.deepEqual(normalizeStars({
   "middle:1": 2,
   "middle:2": 3,

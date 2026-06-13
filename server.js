@@ -7,6 +7,7 @@ import { config } from "./server/config.js";
 import { closeDatabase } from "./server/db.js";
 import { sendJson } from "./server/http.js";
 import { migrate } from "./server/migrate.js";
+import { handleSwagger } from "./server/swagger.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const publicDirectory = join(currentDirectory, "public");
@@ -36,7 +37,10 @@ async function handleRequest(request, response) {
   try {
     const url = new URL(request.url, `http://${request.headers.host}`);
     if (url.pathname.startsWith("/api/")) {
-      if (!(await handleApi(request, response, url))) {
+      if (
+        !(await handleSwagger(request, response, url)) &&
+        !(await handleApi(request, response, url))
+      ) {
         sendJson(response, 404, { error: "API-метод не найден" });
       }
       return;
