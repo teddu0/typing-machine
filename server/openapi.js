@@ -163,6 +163,31 @@ const openapi = {
           401: errorResponse,
         },
       },
+      delete: {
+        tags: ["Progress"],
+        summary: "Обнулить прогресс",
+        description: "Безвозвратно удаляет весь прогресс текущего пользователя.",
+        security: [{ sessionCookie: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  confirmation: { type: "string", const: "обнулить" },
+                },
+                required: ["confirmation"],
+              },
+            },
+          },
+        },
+        responses: {
+          200: { $ref: "#/components/responses/ProgressResponse" },
+          400: errorResponse,
+          401: errorResponse,
+        },
+      },
     },
     "/api/progress/merge": {
       post: {

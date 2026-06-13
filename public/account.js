@@ -4,6 +4,7 @@ let currentUser = null;
 let onAuthenticated = async () => {};
 let onLoggedOut = () => {};
 let onOpenProfile = () => {};
+let onProgressReset = () => {};
 
 async function apiRequest(path, options = {}) {
   const response = await fetch(path, {
@@ -119,10 +120,30 @@ async function updatePassword(event) {
   }
 }
 
+async function resetProgress(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const data = new FormData(form);
+  showMessage("Обнуляем прогресс…", false, "#reset-progress-message");
+  try {
+    await apiRequest("/api/progress", {
+      method: "DELETE",
+      body: JSON.stringify({ confirmation: data.get("confirmation") }),
+    });
+    form.reset();
+    document.querySelector("#reset-progress-button").disabled = true;
+    onProgressReset();
+    showMessage("Прогресс обнулён. Можно начать обучение заново.", false, "#reset-progress-message");
+  } catch (error) {
+    showMessage(error.message, true, "#reset-progress-message");
+  }
+}
+
 function openProfile() {
   document.querySelector("#account-dialog").close();
   showMessage("", false, "#profile-message");
   showMessage("", false, "#password-message");
+  showMessage("", false, "#reset-progress-message");
   renderAccount();
   onOpenProfile();
 }
@@ -131,6 +152,7 @@ async function initializeAccount(callbacks = {}) {
   onAuthenticated = callbacks.onAuthenticated || onAuthenticated;
   onLoggedOut = callbacks.onLoggedOut || onLoggedOut;
   onOpenProfile = callbacks.onOpenProfile || onOpenProfile;
+  onProgressReset = callbacks.onProgressReset || onProgressReset;
 
   const dialog = document.querySelector("#account-dialog");
   document.querySelector("#account-button").addEventListener("click", () => {
@@ -152,6 +174,11 @@ async function initializeAccount(callbacks = {}) {
     event.currentTarget.value = formatBirthDateInput(event.currentTarget.value);
   });
   document.querySelector("#password-form").addEventListener("submit", updatePassword);
+  document.querySelector("#reset-progress-form").addEventListener("submit", resetProgress);
+  document.querySelector("#reset-progress-confirmation").addEventListener("input", (event) => {
+    document.querySelector("#reset-progress-button").disabled =
+      event.currentTarget.value.trim() !== "обнулить";
+  });
   document.querySelector("#logout-button").addEventListener("click", logout);
 
   try {

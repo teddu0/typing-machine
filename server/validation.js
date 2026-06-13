@@ -95,6 +95,14 @@ function validatePasswordChange(body) {
   return { currentPassword, newPassword };
 }
 
+function validateProgressReset(body) {
+  if (typeof body.confirmation !== "string" || body.confirmation.trim() !== "обнулить") {
+    const error = new Error("Для обнуления прогресса введите слово «обнулить»");
+    error.status = 400;
+    throw error;
+  }
+}
+
 export {
   normalizeEmail,
   normalizePhone,
@@ -103,4 +111,5 @@ export {
   validatePassword,
   validatePasswordChange,
   validateProfile,
+  validateProgressReset,
 };

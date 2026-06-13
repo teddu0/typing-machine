@@ -9,6 +9,7 @@ import {
   validateCredentials,
   validatePasswordChange,
   validateProfile,
+  validateProgressReset,
 } from "../server/validation.js";
 
 assert.equal(normalizeEmail("  User@Example.COM "), "user@example.com");
@@ -60,6 +61,10 @@ assert.throws(
   () => validatePasswordChange({ currentPassword: "same-password", newPassword: "same-password" }),
   /отличаться/,
 );
+assert.doesNotThrow(() => validateProgressReset({ confirmation: "обнулить" }));
+assert.doesNotThrow(() => validateProgressReset({ confirmation: "  обнулить  " }));
+assert.throws(() => validateProgressReset({ confirmation: "Обнулить" }), /введите слово/);
+assert.throws(() => validateProgressReset({ confirmation: "" }), /введите слово/);
 
 const passwordHash = await hashPassword("correct horse battery staple");
 assert.notEqual(passwordHash, "correct horse battery staple");
@@ -69,6 +74,7 @@ assert.equal(openapi.openapi, "3.1.0");
 assert.ok(openapi.paths["/api/auth/register"].post);
 assert.ok(openapi.paths["/api/profile"].patch);
 assert.ok(openapi.paths["/api/progress/merge"].post);
+assert.ok(openapi.paths["/api/progress"].delete);
 assert.ok(openapi.components.securitySchemes.sessionCookie);
 assert.deepEqual(normalizeStars({
   "middle:1": 2,

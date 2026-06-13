@@ -2,11 +2,16 @@ import { courses } from "../data/courses.js";
 import { config } from "./config.js";
 import { findUserBySessionToken, login, logout, register, SESSION_SECONDS } from "./auth-service.js";
 import { assertSameOrigin, parseCookies, readJson, sendJson, sessionCookie } from "./http.js";
-import { getProgress, mergeProgress } from "./progress-service.js";
+import { getProgress, mergeProgress, resetProgress } from "./progress-service.js";
 import { changePassword, updateProfile } from "./profile-service.js";
 import { query } from "./db.js";
 import { assertRateLimit } from "./rate-limit.js";
-import { validateCredentials, validatePasswordChange, validateProfile } from "./validation.js";
+import {
+  validateCredentials,
+  validatePasswordChange,
+  validateProfile,
+  validateProgressReset,
+} from "./validation.js";
 
 function getSessionToken(request) {
   return parseCookies(request)[config.sessionCookieName];
@@ -107,6 +112,13 @@ async function handleApi(request, response, url) {
     const user = await requireUser(request);
     const body = await readJson(request);
     sendJson(response, 200, await mergeProgress(user.id, body.stars));
+    return true;
+  }
+
+  if (request.method === "DELETE" && url.pathname === "/api/progress") {
+    const user = await requireUser(request);
+    validateProgressReset(await readJson(request));
+    sendJson(response, 200, await resetProgress(user.id));
     return true;
   }
 

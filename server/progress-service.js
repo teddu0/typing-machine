@@ -60,4 +60,11 @@ async function mergeProgress(userId, incomingStars) {
   });
 }
 
-export { getProgress, mergeProgress, normalizeStars };
+async function resetProgress(userId) {
+  await withTransaction(async (client) => {
+    await client.query("DELETE FROM progress WHERE user_id = $1", [userId]);
+  });
+  return { stars: {} };
+}
+
+export { getProgress, mergeProgress, normalizeStars, resetProgress };

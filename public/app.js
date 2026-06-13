@@ -486,4 +486,9 @@ initializeAccount({
     showScreen("map");
   },
   onOpenProfile: () => showScreen("profile"),
+  onProgressReset: () => {
+    progress = normalizeProgress({ stars: {} });
+    persistProgress(progress);
+    if (courses.length) renderMap();
+  },
 });

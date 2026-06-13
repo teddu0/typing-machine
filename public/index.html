@@ -191,6 +191,18 @@
             <p class="profile-message" id="password-message" data-message-class="profile-message" aria-live="polite"></p>
           </form>
         </div>
+        <form class="danger-zone" id="reset-progress-form">
+          <div>
+            <p class="eyebrow">Опасная зона</p>
+            <h2>Обнулить прогресс</h2>
+            <p>Все звёзды и результаты занятий будут удалены. Чтобы подтвердить действие, введи слово <strong>обнулить</strong>.</p>
+          </div>
+          <label>Подтверждение
+            <input id="reset-progress-confirmation" name="confirmation" type="text" autocomplete="off" placeholder="обнулить" required>
+          </label>
+          <button class="danger-button" id="reset-progress-button" type="submit" disabled>Обнулить прогресс</button>
+          <p class="profile-message" id="reset-progress-message" data-message-class="profile-message" aria-live="polite"></p>
+        </form>
         <div class="profile-logout">
           <button class="secondary-button" id="logout-button" type="button">Выйти из аккаунта</button>
         </div>
