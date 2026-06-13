@@ -383,7 +383,16 @@ function processInput(typed) {
   renderTrainer();
 }
 
+function shouldIgnoreTrainingKeydown(event) {
+  const editableSelector = "input, textarea, select, [contenteditable='true']";
+  return Boolean(
+    document.querySelector("#account-dialog")?.open ||
+    event.target?.closest?.(editableSelector),
+  );
+}
+
 function handleKeydown(event) {
+  if (shouldIgnoreTrainingKeydown(event)) return;
   if (event.ctrlKey || event.altKey || event.metaKey) return;
 
   if (!screens.result.classList.contains("hidden")) {

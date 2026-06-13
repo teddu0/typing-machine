@@ -30,6 +30,7 @@ function createElement(hidden = false) {
       toggle: (name, force) => force ? classes.add(name) : classes.delete(name),
     },
     addEventListener() {},
+    open: false,
     focus() {
       focusedElement = this;
     },
@@ -44,6 +45,7 @@ const elements = new Map([
   ["#guide-screen", createElement(true)],
   ["#trainer-screen", createElement(true)],
   ["#result-screen", createElement(true)],
+  ["#account-dialog", createElement()],
   ["#retry-button", createElement()],
   ["#next-button", createElement()],
 ]);
@@ -139,12 +141,29 @@ const event = {
   preventDefault() {
     this.prevented = true;
   },
+  target: null,
 };
 context.event = event;
 evaluate("handleKeydown(event)");
 assert.equal(event.prevented, false, "Пробел вне тренировки не должен перехватываться");
 
 evaluate("screens.trainer.classList.remove('hidden'); activeLevel = { text: 'а' }");
+event.key = "а";
+event.code = "KeyF";
+event.target = { closest: () => ({ tagName: "INPUT" }) };
+event.prevented = false;
+evaluate("handleKeydown(event)");
+assert.equal(event.prevented, false, "Ввод в поле не должен перехватываться тренажёром");
+assert.equal(evaluate("position"), 0, "Ввод в поле не должен продвигать занятие");
+
+event.target = null;
+elements.get("#account-dialog").open = true;
+event.prevented = false;
+evaluate("handleKeydown(event)");
+assert.equal(event.prevented, false, "Открытое модальное окно должно приостанавливать ввод занятия");
+assert.equal(evaluate("position"), 0, "Открытое модальное окно не должно продвигать занятие");
+elements.get("#account-dialog").open = false;
+
 event.ctrlKey = true;
 event.code = "KeyA";
 event.key = "a";
