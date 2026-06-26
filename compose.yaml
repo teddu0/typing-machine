@@ -3,9 +3,9 @@ services:
     build:
       context: .
     environment:
-      DATABASE_URL: postgres://typing_machine:typing_machine@db:5432/typing_machine
-      NODE_ENV: development
-      PORT: 3000
+      DATABASE_URL: ${DATABASE_URL}
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${PORT:-3000}
     depends_on:
       db:
         condition: service_healthy
@@ -21,13 +21,13 @@ services:
   db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_DB: typing_machine
-      POSTGRES_USER: typing_machine
-      POSTGRES_PASSWORD: typing_machine
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U typing_machine -d typing_machine"]
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 3s
       timeout: 3s
       retries: 20

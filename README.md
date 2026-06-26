@@ -15,12 +15,12 @@ docker compose up --build -d
 применяет SQL-миграции. Затем откройте
 [http://localhost:3000](http://localhost:3000).
 
-PostgreSQL доступен с компьютера по адресу
-`postgres://typing_machine:typing_machine@localhost:5432/typing_machine`.
-Внешний порт можно изменить через `POSTGRES_PORT` в `.env`.
+PostgreSQL доступен с компьютера по адресу из `DATABASE_URL`. Параметры
+подключения и внешний порт можно изменить в `.env`.
 
 Для разработки без Docker нужен доступный PostgreSQL и переменная
-`DATABASE_URL`. Пример настроек находится в `.env.example`.
+`DATABASE_URL`. Пример структуры переменных находится в `.env.example`; реальные
+значения храните только в локальном `.env`.
 
 ```bash
 npm install
@@ -131,14 +131,17 @@ Backend написан на Node.js без серверного фреймвор
 ## Переменные окружения
 
 - `DATABASE_URL` — строка подключения к PostgreSQL.
+- `POSTGRES_DB` — имя базы данных PostgreSQL.
+- `POSTGRES_USER` — пользователь PostgreSQL.
+- `POSTGRES_PASSWORD` — пароль пользователя PostgreSQL.
 - `POSTGRES_PORT` — внешний порт PostgreSQL в Docker Compose, по умолчанию `5432`.
 - `NODE_ENV` — `development` или `production`.
 - `PORT` — порт приложения, по умолчанию `3000`.
 - `SESSION_COOKIE_NAME` — имя cookie серверной сессии.
 - `SESSION_DAYS` — срок действия сессии в днях.
 
-В production необходимо заменить пароли PostgreSQL из `compose.yaml`, включить
-HTTPS и хранить секреты вне репозитория.
+В production необходимо заменить пароли PostgreSQL в `.env`, включить HTTPS и
+хранить секреты вне репозитория.
 
 ## Полный доступ для тестирования
 

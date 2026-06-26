@@ -1,7 +1,22 @@
 const MAX_BODY_BYTES = 100_000;
+const baseSecurityHeaders = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "no-referrer",
+  "Cross-Origin-Opener-Policy": "same-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+};
+
+function securityHeaders(headers = {}) {
+  return {
+    ...baseSecurityHeaders,
+    ...headers,
+  };
+}
 
 function sendJson(response, status, body, headers = {}) {
   response.writeHead(status, {
+    ...securityHeaders(),
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store",
     ...headers,
@@ -66,4 +81,4 @@ function assertSameOrigin(request) {
   }
 }
 
-export { assertSameOrigin, parseCookies, readJson, sendJson, sessionCookie };
+export { assertSameOrigin, parseCookies, readJson, securityHeaders, sendJson, sessionCookie };

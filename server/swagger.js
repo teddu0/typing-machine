@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize, sep } from "node:path";
 import swaggerUiDist from "swagger-ui-dist";
-import { sendJson } from "./http.js";
+import { securityHeaders, sendJson } from "./http.js";
 import { openapi } from "./openapi.js";
 
 const swaggerDirectory = swaggerUiDist.getAbsoluteFSPath();
@@ -40,6 +40,7 @@ const swaggerHtml = `<!doctype html>
 
 function sendContent(response, contentType, content) {
   response.writeHead(200, {
+    ...securityHeaders(),
     "Content-Type": contentType,
     "Cache-Control": "no-store",
   });

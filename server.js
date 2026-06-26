@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { handleApi } from "./server/api.js";
 import { config } from "./server/config.js";
 import { closeDatabase } from "./server/db.js";
-import { sendJson } from "./server/http.js";
+import { securityHeaders, sendJson } from "./server/http.js";
 import { migrate } from "./server/migrate.js";
 import { handleSwagger } from "./server/swagger.js";
 
@@ -15,8 +15,20 @@ const contentTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
+  ".png": "image/png",
   ".svg": "image/svg+xml",
 };
+const appContentSecurityPolicy = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "connect-src 'self'",
+  "object-src 'none'",
+  "base-uri 'none'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join("; ");
 
 function serveFile(response, filePath) {
   readFile(filePath, (error, content) => {
@@ -27,6 +39,7 @@ function serveFile(response, filePath) {
       return;
     }
     response.writeHead(200, {
+      ...securityHeaders({ "Content-Security-Policy": appContentSecurityPolicy }),
       "Content-Type": contentTypes[extname(filePath)] || "application/octet-stream",
     });
     response.end(content);
