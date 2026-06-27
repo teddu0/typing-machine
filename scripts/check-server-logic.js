@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { hashPassword, verifyPassword } from "../server/security.js";
-import { normalizeTypingSession } from "../server/leaderboard-service.js";
+import {
+  leaderboardQuery,
+  normalizeLimit,
+  normalizeTypingSession,
+} from "../server/leaderboard-service.js";
 import { openapi } from "../server/openapi.js";
 import { normalizeStars } from "../server/progress-service.js";
 import {
@@ -79,6 +83,17 @@ assert.ok(openapi.paths["/api/progress/merge"].post);
 assert.ok(openapi.paths["/api/progress"].delete);
 assert.ok(openapi.paths["/api/typing-sessions"].post);
 assert.ok(openapi.components.securitySchemes.sessionCookie);
+assert.match(
+  leaderboardQuery,
+  /participant_ids AS \(\s*SELECT user_id FROM progress\s*UNION\s*SELECT user_id FROM typing_sessions/s,
+);
+assert.match(leaderboardQuery, /LEFT JOIN progress_stats/);
+assert.match(leaderboardQuery, /LEFT JOIN session_stats/);
+assert.equal(normalizeLimit(null), 50);
+assert.equal(normalizeLimit(""), 50);
+assert.equal(normalizeLimit("2"), 2);
+assert.equal(normalizeLimit("0"), 1);
+assert.equal(normalizeLimit("200"), 100);
 assert.deepEqual(normalizeStars({
   "middle:1": 2,
   "middle:2": 3,

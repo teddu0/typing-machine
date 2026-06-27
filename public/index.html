@@ -68,6 +68,7 @@
               <span>Раскладка</span>
               <strong id="layout-value">?</strong>
             </div>
+            <div class="lesson-timer"><span>Время</span><strong id="lesson-timer">00:00</strong></div>
             <div class="lesson-score"><span>Точность</span><strong id="accuracy">100%</strong></div>
           </div>
         </div>
@@ -156,13 +157,15 @@
           <div>
             <p class="eyebrow">Дружеский рейтинг</p>
             <h1>Печатальщики<br><span>Клавишек</span></h1>
-            <p>Здесь видны участники, которые указали имя в профиле и проходят занятия из аккаунта. Пока показываем только отображаемое имя и простую учебную статистику.</p>
+            <p>Здесь видны участники, которые проходят занятия из аккаунта. Если имя в профиле не заполнено, в рейтинге будет показан email.</p>
           </div>
           <div class="leaderboard-note" aria-hidden="true">
             <strong>+10</strong>
             <span>за новое занятие</span>
             <strong>+3</strong>
             <span>за каждую звезду</span>
+            <strong>+1</strong>
+            <span>за минуту практики</span>
           </div>
         </div>
         <div class="leaderboard-card">
@@ -189,7 +192,7 @@
             <div>
               <p class="eyebrow">О себе</p>
               <h2>Данные профиля</h2>
-              <p>Эти поля необязательны. Имя будет отображаться в интерфейсе вместо email.</p>
+              <p>Эти поля необязательны. Имя будет отображаться в интерфейсе и рейтинге вместо email.</p>
             </div>
             <label>Имя
               <input id="profile-display-name" name="displayName" type="text" autocomplete="name" minlength="2" maxlength="40" placeholder="Как к вам обращаться">

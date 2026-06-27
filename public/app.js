@@ -41,13 +41,41 @@ let mistakes = 0;
 let wrongFlash = false;
 let keyboardLayout = "unknown";
 let levelStartedAt = 0;
+let lessonTimerId = null;
 let progress = loadProgress();
 
 function showScreen(name) {
+  if (name !== "trainer") stopLessonTimer();
   Object.entries(screens).forEach(([key, screen]) =>
     screen.classList.toggle("hidden", key !== name),
   );
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function formatTimer(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
+}
+
+function lessonElapsedSeconds() {
+  return Math.max(0, Math.floor((Date.now() - levelStartedAt) / 1000));
+}
+
+function renderLessonTimer() {
+  document.querySelector("#lesson-timer").textContent = formatTimer(lessonElapsedSeconds());
+}
+
+function stopLessonTimer() {
+  if (!lessonTimerId) return;
+  clearInterval(lessonTimerId);
+  lessonTimerId = null;
+}
+
+function startLessonTimer() {
+  stopLessonTimer();
+  renderLessonTimer();
+  lessonTimerId = setInterval(renderLessonTimer, 1000);
 }
 
 function isCourseComplete(course) {
@@ -172,6 +200,7 @@ function startLevel(courseId, levelId) {
   wrongFlash = false;
   keyboardLayout = "unknown";
   levelStartedAt = Date.now();
+  startLessonTimer();
   document.querySelector("#lesson-number").textContent =
     `${activeCourse.title} · занятие ${activeLevel.id} из ${activeCourse.levels.length}`;
   document.querySelector("#lesson-title").textContent = activeLevel.title;
@@ -343,7 +372,8 @@ function focusResultAction(action = "next") {
 function finishLevel() {
   const accuracy = Math.round(((attempts - mistakes) / attempts) * 100);
   const stars = accuracy >= 95 ? 3 : accuracy >= 80 ? 2 : 1;
-  const durationSeconds = Math.max(1, Math.round((Date.now() - levelStartedAt) / 1000));
+  const durationSeconds = Math.max(1, lessonElapsedSeconds());
+  stopLessonTimer();
   const key = levelKey(activeCourse.id, activeLevel.id);
   progress.stars[key] = Math.max(progress.stars[key] || 0, stars);
   persistProgress(progress);
@@ -364,7 +394,7 @@ function finishLevel() {
   document.querySelector("#result-title").textContent =
     stars === 3 ? "Великолепно!" : "Занятие готово!";
   document.querySelector("#result-copy").textContent =
-    `Точность ${accuracy}%. ${mistakes ? "Ошибки помогли пальцам запомнить дорогу." : "Ни одной ошибки — вот это сосредоточенность!"}`;
+    `Точность ${accuracy}%, время ${formatTimer(durationSeconds)}. ${mistakes ? "Ошибки помогли пальцам запомнить дорогу." : "Ни одной ошибки — вот это сосредоточенность!"}`;
   document.querySelector("#next-button").textContent = nextAfterActive()
     ? "Следующее занятие"
     : "К карте курсов";
@@ -373,10 +403,10 @@ function finishLevel() {
 }
 
 function formatPracticeTime(seconds) {
-  const minutes = Math.round(seconds / 60);
-  if (minutes < 1) return "меньше минуты";
-  if (minutes === 1) return "1 минута";
-  return `${minutes} мин.`;
+  const totalSeconds = Math.max(0, Math.floor(seconds));
+  const minutes = Math.floor(totalSeconds / 60);
+  const rest = totalSeconds % 60;
+  return `${minutes}:${String(rest).padStart(2, "0")}`;
 }
 
 function createLeaderboardRow(participant) {
@@ -425,7 +455,7 @@ async function renderLeaderboard() {
     list.innerHTML = "";
     if (!data.participants.length) {
       list.innerHTML =
-        '<p class="leaderboard-empty">Пока рейтинг пуст. Первые участники появятся после занятий из аккаунта с заполненным именем.</p>';
+        '<p class="leaderboard-empty">Пока рейтинг пуст. Первые участники появятся после занятий из аккаунта.</p>';
       return;
     }
     data.participants.forEach((participant) => {

@@ -64,7 +64,7 @@ const openapi = {
       get: {
         tags: ["Leaderboard"],
         summary: "Получить рейтинг участников",
-        description: "Возвращает участников с заполненным display_name и агрегированной статистикой занятий.",
+        description: "Возвращает участников с серверным прогрессом или историей занятий. В имени рейтинга используется display_name, а если он не заполнен — email.",
         parameters: [
           {
             name: "limit",

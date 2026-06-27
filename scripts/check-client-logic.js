@@ -76,6 +76,8 @@ const context = vm.createContext({
   fetchLeaderboard: () => Promise.resolve({ participants: [] }),
   persistProgress: (progress) => saveProgress(progress, localStorage),
   russianLayout,
+  clearInterval() {},
+  setInterval: () => 1,
   setTimeout,
   window: { scrollTo() {} },
 });
