@@ -857,6 +857,9 @@ function handleKeydown(event) {
 document
   .querySelector("#home-button")
   .addEventListener("click", () => showScreen("map"));
+document
+  .querySelector("#lessons-button")
+  .addEventListener("click", () => showScreen("map"));
 document.querySelector("#challenge-button").addEventListener("click", () => {
   showChallengeScreen();
 });

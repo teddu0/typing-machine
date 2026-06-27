@@ -23,7 +23,7 @@ function accountLabel() {
 }
 
 function renderAccount() {
-  document.querySelector("#account-button").textContent = accountLabel();
+  document.querySelector("#account-button .account-label").textContent = accountLabel();
   document.querySelector("#account-user").textContent = accountLabel();
   document.querySelector("#account-forms").classList.toggle("hidden", Boolean(currentUser));
   document.querySelector("#account-session").classList.toggle("hidden", !currentUser);

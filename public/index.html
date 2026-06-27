@@ -15,12 +15,16 @@
         <span>Клавишки</span>
       </button>
       <div class="header-actions">
+        <button class="lessons-button" id="lessons-button" type="button">Занятия</button>
         <button class="challenge-button" id="challenge-button" type="button">Челлендж</button>
         <button class="leaderboard-button" id="leaderboard-button" type="button">Рейтинг</button>
-        <button class="account-button" id="account-button" type="button">Войти</button>
         <button class="guide-button" id="guide-button" type="button">
           <span aria-hidden="true">?</span>
           Как поставить руки
+        </button>
+        <button class="account-button" id="account-button" type="button">
+          <span class="account-icon" aria-hidden="true"></span>
+          <span class="account-label">Войти</span>
         </button>
         <div class="total-stars" aria-label="Собрано звёзд">
           <span>★</span>
@@ -68,6 +72,10 @@
             <strong>АБ</strong>
             <span>только знакомые клавиши</span>
           </div>
+        </div>
+        <div class="challenge-advice">
+          <strong>Перед челленджем лучше пройти занятия</strong>
+          <p>Так пальцы запомнят правильные клавиши, а во время длинного текста будет проще держать технику слепой десятипалой печати: смотреть на экран, не спешить и возвращать пальцы на домашний ряд.</p>
         </div>
         <div class="challenge-card-list" id="challenge-list" aria-live="polite"></div>
       </section>
