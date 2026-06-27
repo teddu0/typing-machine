@@ -36,6 +36,7 @@ const screens = {
   trainer: document.querySelector("#trainer-screen"),
   result: document.querySelector("#result-screen"),
 };
+const RESTORABLE_SCREENS = new Set(["map", "guide", "leaderboard", "profile"]);
 
 let courses = [];
 let activeCourse = null;
@@ -49,12 +50,32 @@ let levelStartedAt = 0;
 let lessonTimerId = null;
 let progress = loadProgress();
 
-function showScreen(name) {
+function updateScreenHash(name) {
+  if (!RESTORABLE_SCREENS.has(name)) return;
+  const nextHash = name === "map" ? "" : `#${name}`;
+  if (window.location.hash === nextHash) return;
+  window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}${nextHash}`);
+}
+
+function showScreen(name, options = {}) {
   if (name !== "trainer") stopLessonTimer();
   Object.entries(screens).forEach(([key, screen]) =>
     screen.classList.toggle("hidden", key !== name),
   );
+  if (options.persist !== false) updateScreenHash(name);
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function initialScreenName() {
+  const screenName = window.location.hash.replace("#", "");
+  return RESTORABLE_SCREENS.has(screenName) ? screenName : "map";
+}
+
+function restoreInitialScreen() {
+  const screenName = initialScreenName();
+  if (screenName === "guide") renderGuideKeyboard();
+  if (screenName === "leaderboard") renderLeaderboard();
+  showScreen(screenName, { persist: false });
 }
 
 function formatTimer(seconds) {
@@ -569,6 +590,9 @@ document
   .querySelector("#leaderboard-back-button")
   .addEventListener("click", () => showScreen("map"));
 document
+  .querySelector("#leaderboard-lessons-button")
+  .addEventListener("click", () => showScreen("map"));
+document
   .querySelector("#leaderboard-refresh-button")
   .addEventListener("click", renderLeaderboard);
 document
@@ -577,10 +601,9 @@ document
 document
   .querySelector("#profile-back-button")
   .addEventListener("click", () => showScreen("map"));
-document.querySelector("#guide-start-button").addEventListener("click", () => {
-  const next = findNextLevel();
-  if (next?.level) startLevel(next.course.id, next.level.id);
-});
+document
+  .querySelector("#guide-start-button")
+  .addEventListener("click", () => showScreen("map"));
 document
   .querySelector("#back-button")
   .addEventListener("click", () => showScreen("map"));
@@ -606,6 +629,7 @@ fetch("/api/courses")
   .then((data) => {
     courses = data;
     renderMap();
+    restoreInitialScreen();
   })
   .catch(() => {
     document.querySelector("#courses-container").innerHTML =

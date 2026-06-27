@@ -90,11 +90,26 @@ const context = vm.createContext({
   clearInterval() {},
   setInterval: () => 1,
   setTimeout,
-  window: { scrollTo() {} },
+  window: {
+    history: {
+      replaceState(_state, _title, url) {
+        const hashIndex = url.indexOf("#");
+        this.lastUrl = url;
+        context.window.location.hash = hashIndex >= 0 ? url.slice(hashIndex) : "";
+      },
+    },
+    location: { hash: "", pathname: "/", search: "" },
+    scrollTo() {},
+  },
 });
 
 const appSource = readFileSync(new URL("../public/app.js", import.meta.url), "utf8")
   .replace(/^import[\s\S]*?from ".*";\r?\n/gm, "");
+assert.match(
+  appSource,
+  /#guide-start-button"\)\s*\.addEventListener\("click", \(\) => showScreen\("map"\)\)/,
+  "Кнопка инструкции должна возвращать к карте курсов",
+);
 vm.runInContext(appSource, context);
 
 function evaluate(expression) {
@@ -191,6 +206,19 @@ const event = {
 context.event = event;
 evaluate("handleKeydown(event)");
 assert.equal(event.prevented, false, "Пробел вне тренировки не должен перехватываться");
+
+evaluate("showScreen('leaderboard')");
+assert.equal(
+  context.window.location.hash,
+  "#leaderboard",
+  "Экран рейтинга должен сохраняться в адресе",
+);
+evaluate("showScreen('map')");
+assert.equal(
+  context.window.location.hash,
+  "",
+  "Возврат к карте должен очищать hash экрана",
+);
 
 evaluate("screens.trainer.classList.remove('hidden'); activeLevel = { text: 'а' }");
 event.key = "а";
