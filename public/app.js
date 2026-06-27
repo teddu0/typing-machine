@@ -6,9 +6,14 @@ import {
 } from "./account.js";
 import { russianLayout } from "./keyboard-layouts.js";
 import {
+  addPendingSession,
+  clearPendingSessions,
+  clearProgress,
   levelKey,
+  loadPendingSessions,
   loadProgress,
   normalizeProgress,
+  savePendingSessions,
   saveProgress as persistProgress,
 } from "./progress.js";
 
@@ -375,10 +380,7 @@ function finishLevel() {
   const durationSeconds = Math.max(1, lessonElapsedSeconds());
   stopLessonTimer();
   const key = levelKey(activeCourse.id, activeLevel.id);
-  progress.stars[key] = Math.max(progress.stars[key] || 0, stars);
-  persistProgress(progress);
-  mergeServerProgress(progress.stars).catch(() => {});
-  recordTypingSession({
+  const session = {
     courseId: activeCourse.id,
     levelId: activeLevel.id,
     stars,
@@ -386,7 +388,15 @@ function finishLevel() {
     attempts,
     mistakes,
     durationSeconds,
-  }).catch(() => {});
+  };
+  progress.stars[key] = Math.max(progress.stars[key] || 0, stars);
+  persistProgress(progress);
+  mergeServerProgress(progress.stars).catch(() => {});
+  recordTypingSession(session)
+    .then((result) => {
+      if (!result) addPendingSession(session);
+    })
+    .catch(() => addPendingSession(session));
   renderMap();
 
   document.querySelector("#result-stars").textContent =
@@ -602,9 +612,28 @@ fetch("/api/courses")
       "<p>Не получилось загрузить курсы. Попробуй обновить страницу.</p>";
   });
 
+async function syncPendingSessions() {
+  const sessions = loadPendingSessions();
+  if (!sessions.length) return;
+
+  const unsyncedSessions = [];
+  for (const session of sessions) {
+    try {
+      const result = await recordTypingSession(session);
+      if (!result) unsyncedSessions.push(session);
+    } catch {
+      unsyncedSessions.push(session);
+    }
+  }
+
+  if (unsyncedSessions.length) savePendingSessions(unsyncedSessions);
+  else clearPendingSessions();
+}
+
 initializeAccount({
   onAuthenticated: async () => {
     const serverProgress = await mergeServerProgress(progress.stars);
+    await syncPendingSessions();
     if (!serverProgress) return;
     progress = normalizeProgress({
       courseVersion: progress.courseVersion,
@@ -614,6 +643,9 @@ initializeAccount({
     if (courses.length) renderMap();
   },
   onLoggedOut: () => {
+    progress = normalizeProgress({ stars: {} });
+    clearProgress();
+    clearPendingSessions();
     if (courses.length) renderMap();
     showScreen("map");
   },
@@ -621,6 +653,7 @@ initializeAccount({
   onProgressReset: () => {
     progress = normalizeProgress({ stars: {} });
     persistProgress(progress);
+    clearPendingSessions();
     if (courses.length) renderMap();
   },
 });

@@ -4,9 +4,14 @@ import vm from "node:vm";
 import { russianLayout } from "../public/keyboard-layouts.js";
 import { formatBirthDateInput, formatIsoDate, parseRussianDate } from "../public/date-format.js";
 import {
+  addPendingSession,
+  clearPendingSessions,
+  clearProgress,
   levelKey,
+  loadPendingSessions,
   loadProgress as loadStoredProgress,
   normalizeProgress,
+  savePendingSessions,
   saveProgress,
 } from "../public/progress.js";
 
@@ -53,6 +58,7 @@ const fallbackElement = createElement();
 const storage = new Map();
 const localStorage = {
   getItem: (key) => storage.get(key) ?? null,
+  removeItem: (key) => storage.delete(key),
   setItem: (key, value) => storage.set(key, value),
 };
 const context = vm.createContext({
@@ -66,14 +72,19 @@ const context = vm.createContext({
     querySelectorAll: () => [],
   },
   fetch: () => new Promise(() => {}),
+  addPendingSession: (session) => addPendingSession(session, localStorage),
+  clearPendingSessions: () => clearPendingSessions(localStorage),
+  clearProgress: () => clearProgress(localStorage),
   initializeAccount() {},
   levelKey,
+  loadPendingSessions: () => loadPendingSessions(localStorage),
   loadProgress: () => loadStoredProgress(localStorage),
   localStorage,
   normalizeProgress,
   mergeServerProgress: () => Promise.resolve(null),
   recordTypingSession: () => Promise.resolve(null),
   fetchLeaderboard: () => Promise.resolve({ participants: [] }),
+  savePendingSessions: (sessions) => savePendingSessions(sessions, localStorage),
   persistProgress: (progress) => saveProgress(progress, localStorage),
   russianLayout,
   clearInterval() {},
@@ -127,12 +138,42 @@ assert.deepEqual(
   "Повреждённое актуальное сохранение не должно ломать приложение",
 );
 
+addPendingSession({
+  courseId: "middle",
+  levelId: 1,
+  stars: 3,
+  accuracy: 98,
+  attempts: 40,
+  mistakes: 1,
+  durationSeconds: 75,
+}, localStorage);
+addPendingSession({ courseId: "middle", levelId: 2, stars: 7 }, localStorage);
+assert.deepEqual(
+  loadPendingSessions(localStorage),
+  [{
+    courseId: "middle",
+    levelId: 1,
+    stars: 3,
+    accuracy: 98,
+    attempts: 40,
+    mistakes: 1,
+    durationSeconds: 75,
+  }],
+  "Локальная очередь занятий должна хранить только корректные результаты",
+);
+clearPendingSessions(localStorage);
+assert.deepEqual(loadPendingSessions(localStorage), [], "Локальная очередь занятий должна очищаться");
+
 localStorage.setItem = () => {
   throw new Error("Storage disabled");
 };
 assert.doesNotThrow(
   () => evaluate("persistProgress(progress)"),
   "Запрет localStorage не должен ломать приложение",
+);
+assert.doesNotThrow(
+  () => clearProgress(localStorage),
+  "Запрет localStorage не должен ломать очистку прогресса",
 );
 
 const event = {
