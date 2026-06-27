@@ -15,6 +15,7 @@
         <span>Клавишки</span>
       </button>
       <div class="header-actions">
+        <button class="challenge-button" id="challenge-button" type="button">Челлендж</button>
         <button class="leaderboard-button" id="leaderboard-button" type="button">Рейтинг</button>
         <button class="account-button" id="account-button" type="button">Войти</button>
         <button class="guide-button" id="guide-button" type="button">
@@ -53,6 +54,63 @@
         </div>
         <div class="progress-track"><div id="progress-fill"></div></div>
         <div id="courses-container" class="courses-container" aria-live="polite"></div>
+      </section>
+
+      <section id="challenge-screen" class="screen hidden">
+        <button class="back-button" id="challenge-back-button" type="button">← К карте курсов</button>
+        <div class="challenge-hero">
+          <div>
+            <p class="eyebrow">Челлендж</p>
+            <h1>Перепечатай<br><span>настоящий текст</span></h1>
+            <p>Выбери короткую историю, печатай спокойно и смотри на точность. Здесь нет звёзд, только практика с цельным текстом.</p>
+          </div>
+          <div class="challenge-note" aria-hidden="true">
+            <strong>АБ</strong>
+            <span>только знакомые клавиши</span>
+          </div>
+        </div>
+        <div class="challenge-card-list" id="challenge-list" aria-live="polite"></div>
+      </section>
+
+      <section id="challenge-trainer-screen" class="screen hidden">
+        <button class="back-button" id="challenge-trainer-back-button" type="button">← К челленджам</button>
+        <div class="lesson-heading">
+          <div>
+            <p class="eyebrow" id="challenge-difficulty">Челлендж</p>
+            <h1 id="challenge-title">Текст</h1>
+            <p id="challenge-description"></p>
+          </div>
+          <div class="lesson-status">
+            <div class="layout-status" id="challenge-layout-status">
+              <span>Раскладка</span>
+              <strong id="challenge-layout-value">?</strong>
+            </div>
+            <div class="lesson-timer"><span>Время</span><strong id="challenge-timer">00:00</strong></div>
+            <div class="lesson-score"><span>Точность</span><strong id="challenge-accuracy">100%</strong></div>
+          </div>
+        </div>
+        <div class="typing-card">
+          <div id="challenge-text" class="typing-text" aria-label="Текст челленджа"></div>
+          <div id="challenge-layout-warning" class="layout-warning hidden" role="alert">
+            <strong>Сейчас включена английская раскладка EN</strong>
+            <span>Переключи клавиатуру на русский язык RU и продолжай челлендж.</span>
+          </div>
+          <p id="challenge-message" class="message">Печатай текст по порядку</p>
+        </div>
+        <div id="challenge-keyboard" class="keyboard" aria-label="Экранная клавиатура челленджа"></div>
+      </section>
+
+      <section id="challenge-result-screen" class="screen hidden">
+        <div class="result-card">
+          <div class="result-stars" id="challenge-result-mark">✓</div>
+          <p class="eyebrow">Челлендж завершён</p>
+          <h1 id="challenge-result-title">Отличная практика!</h1>
+          <p id="challenge-result-copy"></p>
+          <div class="result-actions">
+            <button class="secondary-button" id="challenge-retry-button" type="button">Ещё раз</button>
+            <button class="primary-button" id="challenge-list-button" type="button">К списку текстов</button>
+          </div>
+        </div>
       </section>
 
       <section id="trainer-screen" class="screen hidden">

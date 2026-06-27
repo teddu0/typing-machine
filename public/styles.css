@@ -38,6 +38,7 @@ button { font: inherit; }
   gap: 12px;
 }
 
+.challenge-button,
 .guide-button,
 .leaderboard-button {
   min-height: 42px;
@@ -51,6 +52,12 @@ button { font: inherit; }
   background: #f5f2ff;
   font-weight: 900;
   cursor: pointer;
+}
+
+.challenge-button {
+  color: #9a6415;
+  border-color: #f0cf8b;
+  background: #fff7dc;
 }
 
 .leaderboard-button {
@@ -390,6 +397,35 @@ h1 span { color: var(--purple); }
 .typing-text .done { color: var(--green); }
 .typing-text .current { color: var(--ink); background: var(--yellow); border-radius: 7px; }
 .typing-text .wrong { color: white; background: var(--red); }
+
+#challenge-trainer-screen .typing-card {
+  margin-top: 22px;
+  padding: clamp(18px, 3.5vw, 34px);
+}
+
+#challenge-trainer-screen .typing-text {
+  max-height: 34vh;
+  min-height: 86px;
+  overflow-y: auto;
+  font-size: clamp(23px, 3.4vw, 36px);
+  line-height: 1.42;
+}
+
+#challenge-trainer-screen .keyboard {
+  margin-top: 20px;
+  gap: 8px;
+  padding-top: 2px;
+}
+
+#challenge-trainer-screen .key {
+  width: clamp(25px, 5.4vw, 58px);
+}
+
+#challenge-trainer-screen .space-key {
+  width: min(360px, 68vw);
+  height: 68px;
+}
+
 .layout-warning {
   margin-top: 24px;
   padding: 16px 18px;
@@ -500,6 +536,115 @@ h1 span { color: var(--purple); }
 .guide-intro {
   max-width: 760px;
   margin-bottom: 32px;
+}
+
+.challenge-hero {
+  padding: clamp(28px, 6vw, 56px);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 26px;
+  align-items: center;
+  border: 3px solid white;
+  border-radius: 36px;
+  background: linear-gradient(135deg, #fffdf8, #fff2d5);
+  box-shadow: var(--shadow);
+}
+
+.challenge-hero h1 {
+  margin-bottom: 14px;
+  font-size: clamp(38px, 6vw, 64px);
+}
+
+.challenge-hero p:not(.eyebrow) {
+  max-width: 680px;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.challenge-note {
+  min-width: 180px;
+  padding: 24px;
+  display: grid;
+  gap: 6px;
+  border: 3px dashed #f0cf8b;
+  border-radius: 28px;
+  background: white;
+  text-align: center;
+  transform: rotate(2deg);
+}
+
+.challenge-note strong {
+  color: #9a6415;
+  font-size: 38px;
+}
+
+.challenge-note span {
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.challenge-card-list {
+  margin-top: 28px;
+  display: grid;
+  gap: 30px;
+}
+
+.challenge-group {
+  padding: clamp(18px, 4vw, 30px);
+  border: 2px solid white;
+  border-radius: 28px;
+  background: rgba(255, 253, 248, 0.9);
+  box-shadow: var(--shadow);
+}
+
+.challenge-group-heading {
+  margin: 0 0 18px;
+}
+
+.challenge-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.challenge-card {
+  min-height: 180px;
+  padding: 22px;
+  border: 2px solid transparent;
+  border-radius: 22px;
+  color: var(--ink);
+  background: white;
+  box-shadow: 0 8px 24px rgba(66, 55, 128, 0.08);
+  text-align: left;
+  cursor: pointer;
+}
+
+.challenge-card:hover {
+  border-color: #f0cf8b;
+  transform: translateY(-2px);
+}
+
+.challenge-card span {
+  display: inline-block;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #9a6415;
+  background: #fff7dc;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.challenge-card h3 {
+  margin: 18px 0 8px;
+  font-size: 22px;
+}
+
+.challenge-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
 }
 
 .leaderboard-hero {
@@ -1210,7 +1355,8 @@ h1 span { color: var(--purple); }
 }
 .guide-finish p { margin: 0; max-width: 720px; line-height: 1.6; }
 
-#result-screen { min-height: 70vh; display: grid; place-items: center; }
+#result-screen,
+#challenge-result-screen { min-height: 70vh; display: grid; place-items: center; }
 .result-card { width: min(620px, 100%); padding: clamp(32px, 8vw, 72px); border-radius: 36px; background: white; box-shadow: var(--shadow); text-align: center; }
 .result-stars { margin-bottom: 20px; font-size: clamp(46px, 9vw, 78px); letter-spacing: 8px; }
 .result-card h1 { font-size: clamp(38px, 7vw, 58px); }
@@ -1254,6 +1400,10 @@ h1 span { color: var(--purple); }
   .account-forms { grid-template-columns: 1fr; }
   .profile-grid { grid-template-columns: 1fr; }
   .guide-button { width: 42px; padding: 0; justify-content: center; font-size: 0; }
+  .challenge-button { min-height: 38px; padding: 0 12px; }
+  .challenge-hero { grid-template-columns: 1fr; padding: 28px 22px; border-radius: 24px; }
+  .challenge-note { min-width: 0; transform: none; }
+  .challenge-grid { grid-template-columns: 1fr; }
   .leaderboard-button { min-height: 38px; padding: 0 12px; }
   .leaderboard-hero { grid-template-columns: 1fr; padding: 28px 22px; border-radius: 24px; }
   .leaderboard-note { min-width: 0; transform: none; }
@@ -1340,6 +1490,36 @@ h1 span { color: var(--purple); }
     font-size: 13px;
   }
   #trainer-screen .space-key span { font-size: 23px; }
+
+  #challenge-trainer-screen .back-button { margin: 4px 0 14px; }
+  #challenge-trainer-screen .lesson-heading h1 { margin-bottom: 6px; font-size: 34px; }
+  #challenge-trainer-screen .lesson-heading p:not(.eyebrow) { margin-bottom: 0; font-size: 15px; }
+  #challenge-trainer-screen .lesson-status { gap: 8px; }
+  #challenge-trainer-screen .layout-status,
+  #challenge-trainer-screen .lesson-score,
+  #challenge-trainer-screen .lesson-timer {
+    min-width: 104px;
+    padding: 12px 14px;
+    border-radius: 16px;
+  }
+  #challenge-trainer-screen .typing-card {
+    margin-top: 14px;
+    padding: 18px 24px;
+  }
+  #challenge-trainer-screen .typing-text {
+    max-height: 30vh;
+    min-height: 72px;
+    font-size: clamp(22px, 3vw, 32px);
+    line-height: 1.38;
+  }
+  #challenge-trainer-screen .layout-warning { margin-top: 12px; padding: 10px 14px; }
+  #challenge-trainer-screen .message { margin-top: 10px; }
+  #challenge-trainer-screen .keyboard { margin-top: 16px; gap: 7px; }
+  #challenge-trainer-screen .key {
+    width: clamp(25px, 4.8vw, 52px);
+    font-size: clamp(13px, 1.8vw, 19px);
+  }
+  #challenge-trainer-screen .space-key { width: min(330px, 62vw); height: 52px; }
 }
 
 @media (max-height: 760px) and (min-width: 700px) {
@@ -1357,6 +1537,15 @@ h1 span { color: var(--purple); }
   #trainer-screen .keyboard { gap: 5px; }
   #trainer-screen .key { width: clamp(26px, 4vw, 44px); }
   #trainer-screen .space-key { height: 42px; }
+
+  #challenge-trainer-screen .back-button { margin-bottom: 5px; }
+  #challenge-trainer-screen .lesson-heading h1 { font-size: 24px; }
+  #challenge-trainer-screen .lesson-heading p:not(.eyebrow) { display: none; }
+  #challenge-trainer-screen .typing-card { margin-top: 7px; padding: 10px 16px; }
+  #challenge-trainer-screen .typing-text { max-height: 26vh; min-height: 40px; font-size: 22px; }
+  #challenge-trainer-screen .keyboard { margin-top: 10px; gap: 5px; }
+  #challenge-trainer-screen .key { width: clamp(25px, 3.8vw, 42px); }
+  #challenge-trainer-screen .space-key { width: min(300px, 60vw); height: 40px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

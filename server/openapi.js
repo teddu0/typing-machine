@@ -60,6 +60,22 @@ const openapi = {
         },
       },
     },
+    "/api/challenges": {
+      get: {
+        tags: ["System"],
+        summary: "Получить тексты челленджей",
+        responses: {
+          200: {
+            description: "Список текстов для перепечатки",
+            content: {
+              "application/json": {
+                schema: { type: "array", items: { $ref: "#/components/schemas/Challenge" } },
+              },
+            },
+          },
+        },
+      },
+    },
     "/api/leaderboard": {
       get: {
         tags: ["Leaderboard"],
@@ -321,6 +337,17 @@ const openapi = {
         type: "object",
         additionalProperties: { type: "integer", minimum: 1, maximum: 3 },
         examples: [{ "middle:1": 3, "middle:2": 2 }],
+      },
+      Challenge: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+          title: { type: "string" },
+          difficulty: { type: "string" },
+          description: { type: "string" },
+          text: { type: "string" },
+        },
+        required: ["id", "title", "difficulty", "description", "text"],
       },
       TypingSessionInput: {
         type: "object",

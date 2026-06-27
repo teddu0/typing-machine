@@ -1,4 +1,5 @@
 import { courses } from "../data/courses.js";
+import { challenges } from "../data/challenges.js";
 import { config } from "./config.js";
 import { findUserBySessionToken, login, logout, register, SESSION_SECONDS } from "./auth-service.js";
 import { assertSameOrigin, parseCookies, readJson, sendJson, sessionCookie } from "./http.js";
@@ -50,6 +51,11 @@ async function handleApi(request, response, url) {
 
   if (request.method === "GET" && url.pathname === "/api/courses") {
     sendJson(response, 200, courses);
+    return true;
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/challenges") {
+    sendJson(response, 200, challenges);
     return true;
   }
 

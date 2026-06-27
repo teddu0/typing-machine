@@ -5,6 +5,7 @@ let onAuthenticated = async () => {};
 let onLoggedOut = () => {};
 let onOpenProfile = () => {};
 let onProgressReset = () => {};
+let onReady = () => {};
 
 async function apiRequest(path, options = {}) {
   const response = await fetch(path, {
@@ -162,6 +163,7 @@ async function initializeAccount(callbacks = {}) {
   onLoggedOut = callbacks.onLoggedOut || onLoggedOut;
   onOpenProfile = callbacks.onOpenProfile || onOpenProfile;
   onProgressReset = callbacks.onProgressReset || onProgressReset;
+  onReady = callbacks.onReady || onReady;
 
   const dialog = document.querySelector("#account-dialog");
   document.querySelector("#account-button").addEventListener("click", () => {
@@ -202,6 +204,8 @@ async function initializeAccount(callbacks = {}) {
     }
   } catch {
     renderAccount();
+  } finally {
+    onReady();
   }
 }
 

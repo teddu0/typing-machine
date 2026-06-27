@@ -48,6 +48,9 @@ function createElement(hidden = false) {
 const elements = new Map([
   ["#map-screen", createElement()],
   ["#guide-screen", createElement(true)],
+  ["#challenge-screen", createElement(true)],
+  ["#challenge-trainer-screen", createElement(true)],
+  ["#challenge-result-screen", createElement(true)],
   ["#trainer-screen", createElement(true)],
   ["#result-screen", createElement(true)],
   ["#account-dialog", createElement()],

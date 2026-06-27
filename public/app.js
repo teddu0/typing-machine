@@ -34,15 +34,30 @@ const screens = {
   map: document.querySelector("#map-screen"),
   guide: document.querySelector("#guide-screen"),
   leaderboard: document.querySelector("#leaderboard-screen"),
+  challenge: document.querySelector("#challenge-screen"),
+  challengeTrainer: document.querySelector("#challenge-trainer-screen"),
+  challengeResult: document.querySelector("#challenge-result-screen"),
   profile: document.querySelector("#profile-screen"),
   trainer: document.querySelector("#trainer-screen"),
   result: document.querySelector("#result-screen"),
 };
-const RESTORABLE_SCREENS = new Set(["map", "guide", "leaderboard", "profile"]);
+const RESTORABLE_SCREENS = new Set(["map", "guide", "leaderboard", "challenge", "profile"]);
 
 let courses = [];
+let challenges = [];
+let coursesReady = false;
+let accountReady = false;
+let initialScreenRestored = false;
 let activeCourse = null;
 let activeLevel = null;
+let activeChallenge = null;
+let challengePosition = 0;
+let challengeAttempts = 0;
+let challengeMistakes = 0;
+let challengeStartedAt = 0;
+let challengeTimerId = null;
+let challengeWrongFlash = false;
+let challengeKeyboardLayout = "unknown";
 let position = 0;
 let attempts = 0;
 let mistakes = 0;
@@ -61,6 +76,7 @@ function updateScreenHash(name) {
 
 function showScreen(name, options = {}) {
   if (name !== "trainer") stopLessonTimer();
+  if (name !== "challengeTrainer") stopChallengeTimer();
   Object.entries(screens).forEach(([key, screen]) =>
     screen.classList.toggle("hidden", key !== name),
   );
@@ -74,10 +90,30 @@ function initialScreenName() {
 }
 
 function restoreInitialScreen() {
+  if (initialScreenRestored) return;
+  initialScreenRestored = true;
   const screenName = initialScreenName();
   if (screenName === "guide") renderGuideKeyboard();
   if (screenName === "leaderboard") renderLeaderboard();
+  if (screenName === "challenge") {
+    showChallengeScreen({ persist: false });
+    return;
+  }
   showScreen(screenName, { persist: false });
+}
+
+function tryRestoreInitialScreen() {
+  if (coursesReady && accountReady) restoreInitialScreen();
+}
+
+function showChallengeScreen(options = {}) {
+  if (!isAuthenticated()) {
+    showScreen("map");
+    openAccountDialog();
+    return;
+  }
+  renderChallenges();
+  showScreen("challenge", options);
 }
 
 function formatTimer(seconds) {
@@ -100,10 +136,30 @@ function stopLessonTimer() {
   lessonTimerId = null;
 }
 
+function stopChallengeTimer() {
+  if (!challengeTimerId) return;
+  clearInterval(challengeTimerId);
+  challengeTimerId = null;
+}
+
 function startLessonTimer() {
   stopLessonTimer();
   renderLessonTimer();
   lessonTimerId = setInterval(renderLessonTimer, 1000);
+}
+
+function challengeElapsedSeconds() {
+  return Math.max(0, Math.floor((Date.now() - challengeStartedAt) / 1000));
+}
+
+function renderChallengeTimer() {
+  document.querySelector("#challenge-timer").textContent = formatTimer(challengeElapsedSeconds());
+}
+
+function startChallengeTimer() {
+  stopChallengeTimer();
+  renderChallengeTimer();
+  challengeTimerId = setInterval(renderChallengeTimer, 1000);
 }
 
 function isCourseComplete(course) {
@@ -251,10 +307,26 @@ function renderLayoutStatus() {
   warning.classList.toggle("hidden", keyboardLayout !== "en");
 }
 
+function renderChallengeLayoutStatus() {
+  const status = document.querySelector("#challenge-layout-status");
+  const value = document.querySelector("#challenge-layout-value");
+  const warning = document.querySelector("#challenge-layout-warning");
+  status.className = `layout-status ${challengeKeyboardLayout}`;
+  value.textContent =
+    challengeKeyboardLayout === "unknown" ? "?" : challengeKeyboardLayout.toUpperCase();
+  warning.classList.toggle("hidden", challengeKeyboardLayout !== "en");
+}
+
 function setKeyboardLayout(layout) {
   if (keyboardLayout === layout) return;
   keyboardLayout = layout;
   renderLayoutStatus();
+}
+
+function setChallengeKeyboardLayout(layout) {
+  if (challengeKeyboardLayout === layout) return;
+  challengeKeyboardLayout = layout;
+  renderChallengeLayoutStatus();
 }
 
 function renderTrainer() {
@@ -379,6 +451,37 @@ function renderKeyboard() {
   keyboard.append(space);
 }
 
+function createChallengeKey(character) {
+  const key = document.createElement("button");
+  key.className = `key challenge-key ${FINGER_COLOR_CLASSES[character]}${character === "а" || character === "о" ? " home" : ""}`;
+  key.type = "button";
+  key.dataset.key = character;
+  key.textContent = character.toUpperCase();
+  key.setAttribute("aria-label", character === " " ? "Пробел" : `Клавиша ${character.toUpperCase()}`);
+  key.addEventListener("click", () => processChallengeInput(character));
+  return key;
+}
+
+function renderChallengeKeyboard() {
+  const keyboard = document.querySelector("#challenge-keyboard");
+  keyboard.innerHTML = "";
+  KEYBOARD_ROWS.forEach((row, index) => {
+    const rowElement = document.createElement("div");
+    rowElement.className = `keyboard-row row-${index + 1}`;
+    row.forEach((character) => rowElement.append(createChallengeKey(character)));
+    keyboard.append(rowElement);
+  });
+
+  const space = document.createElement("button");
+  space.className = `key challenge-key space-key ${FINGER_COLOR_CLASSES[" "]}`;
+  space.type = "button";
+  space.dataset.key = " ";
+  space.innerHTML = '<span aria-hidden="true">▭</span><strong>ПРОБЕЛ</strong>';
+  space.setAttribute("aria-label", "Пробел");
+  space.addEventListener("click", () => processChallengeInput(" "));
+  keyboard.append(space);
+}
+
 function nextAfterActive() {
   const courseIndex = courses.indexOf(activeCourse);
   const levelIndex = activeCourse.levels.indexOf(activeLevel);
@@ -440,6 +543,139 @@ function formatPracticeTime(seconds) {
   const minutes = Math.floor(totalSeconds / 60);
   const rest = totalSeconds % 60;
   return `${minutes}:${String(rest).padStart(2, "0")}`;
+}
+
+function renderChallenges() {
+  const list = document.querySelector("#challenge-list");
+  list.innerHTML = "";
+  if (!challenges.length) {
+    list.innerHTML = '<p class="leaderboard-empty">Загружаем тексты челленджа…</p>';
+    return;
+  }
+
+  const groups = [...new Set(challenges.map((challenge) => challenge.difficulty))];
+  groups.forEach((difficulty) => {
+    const section = document.createElement("section");
+    section.className = "challenge-group";
+    section.innerHTML = `
+      <div class="section-heading challenge-group-heading">
+        <div>
+          <p class="eyebrow">Сложность</p>
+          <h2>${difficulty}</h2>
+        </div>
+      </div>
+      <div class="challenge-grid"></div>
+    `;
+
+    const grid = section.querySelector(".challenge-grid");
+    challenges
+      .filter((challenge) => challenge.difficulty === difficulty)
+      .forEach((challenge) => {
+        const button = document.createElement("button");
+        button.className = "challenge-card";
+        button.type = "button";
+        button.innerHTML = `
+          <span>${challenge.text.length} символов</span>
+          <h3>${challenge.title}</h3>
+          <p>${challenge.description}</p>
+        `;
+        button.addEventListener("click", () => startChallenge(challenge.id));
+        grid.append(button);
+      });
+    list.append(section);
+  });
+}
+
+function startChallenge(challengeId) {
+  activeChallenge = challenges.find((challenge) => challenge.id === challengeId);
+  if (!activeChallenge) return;
+
+  challengePosition = 0;
+  challengeAttempts = 0;
+  challengeMistakes = 0;
+  challengeWrongFlash = false;
+  challengeKeyboardLayout = "unknown";
+  challengeStartedAt = Date.now();
+  document.querySelector("#challenge-difficulty").textContent = activeChallenge.difficulty;
+  document.querySelector("#challenge-title").textContent = activeChallenge.title;
+  document.querySelector("#challenge-description").textContent = activeChallenge.description;
+  document.querySelector("#challenge-message").textContent = "Печатай текст по порядку";
+  document.querySelector("#challenge-message").className = "message";
+  renderChallengeLayoutStatus();
+  renderChallengeKeyboard();
+  renderChallengeTrainer();
+  startChallengeTimer();
+  showScreen("challengeTrainer");
+}
+
+function renderChallengeTrainer() {
+  const text = document.querySelector("#challenge-text");
+  text.innerHTML = [...activeChallenge.text]
+    .map((character, index) => {
+      let className = "";
+      if (index < challengePosition) className = "done";
+      if (index === challengePosition)
+        className = challengeWrongFlash ? "current wrong" : "current";
+      return `<span class="${className}">${character === " " ? "&nbsp;" : character}</span>`;
+    })
+    .join("");
+  text.querySelector(".current")?.scrollIntoView({ block: "center" });
+
+  const accuracy = challengeAttempts
+    ? Math.round(((challengeAttempts - challengeMistakes) / challengeAttempts) * 100)
+    : 100;
+  document.querySelector("#challenge-accuracy").textContent = `${accuracy}%`;
+  const nextCharacter = activeChallenge.text[challengePosition];
+  document.querySelectorAll(".challenge-key").forEach((key) => {
+    const isActive = key.dataset.key === nextCharacter;
+    key.classList.toggle("active", isActive);
+    key.setAttribute("aria-pressed", String(isActive));
+  });
+}
+
+function finishChallenge() {
+  const accuracy = Math.round(((challengeAttempts - challengeMistakes) / challengeAttempts) * 100);
+  const durationSeconds = Math.max(1, challengeElapsedSeconds());
+  const charsPerMinute = Math.round((activeChallenge.text.length / durationSeconds) * 60);
+  stopChallengeTimer();
+
+  document.querySelector("#challenge-result-title").textContent =
+    accuracy >= 95 ? "Очень ровно!" : "Челлендж завершён!";
+  document.querySelector("#challenge-result-copy").textContent =
+    `Точность ${accuracy}%, время ${formatTimer(durationSeconds)}, скорость ${charsPerMinute} символов в минуту.`;
+  showScreen("challengeResult");
+  document.querySelector("#challenge-list-button").focus();
+}
+
+function processChallengeInput(typed) {
+  if (
+    screens.challengeTrainer.classList.contains("hidden") ||
+    !activeChallenge ||
+    !TRAINABLE_CHARACTERS.has(typed)
+  )
+    return;
+
+  const expected = activeChallenge.text[challengePosition];
+  challengeAttempts += 1;
+  const message = document.querySelector("#challenge-message");
+
+  if (typed === expected) {
+    challengePosition += 1;
+    challengeWrongFlash = false;
+    message.textContent = "Получилось! Продолжай";
+    message.className = "message good";
+    if (challengePosition === activeChallenge.text.length) {
+      finishChallenge();
+      return;
+    }
+  } else {
+    challengeMistakes += 1;
+    challengeWrongFlash = true;
+    message.textContent = `Сейчас нужна клавиша «${expected === " " ? "пробел" : expected.toUpperCase()}»`;
+    message.className = "message try";
+  }
+
+  renderChallengeTrainer();
 }
 
 function createLeaderboardRow(participant) {
@@ -561,6 +797,37 @@ function handleKeydown(event) {
     return;
   }
 
+  if (!screens.challengeResult.classList.contains("hidden")) {
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault();
+      document
+        .querySelector(event.key === "ArrowLeft" ? "#challenge-retry-button" : "#challenge-list-button")
+        .focus();
+    }
+    return;
+  }
+
+  if (!screens.challengeTrainer.classList.contains("hidden") && activeChallenge) {
+    const typed = event.key.toLowerCase();
+    if (activeLayout.isLetter(event.key)) {
+      setChallengeKeyboardLayout("ru");
+    } else if (
+      /^[a-z]$/i.test(event.key) ||
+      (PHYSICAL_LETTER_CODES.has(event.code) && !TRAINABLE_CHARACTERS.has(typed))
+    ) {
+      event.preventDefault();
+      setChallengeKeyboardLayout("en");
+      const message = document.querySelector("#challenge-message");
+      message.textContent = "Сначала переключим клавиатуру на русский язык";
+      message.className = "message layout-help";
+      return;
+    }
+    if (!TRAINABLE_CHARACTERS.has(typed)) return;
+    event.preventDefault();
+    processChallengeInput(typed);
+    return;
+  }
+
   if (
     screens.trainer.classList.contains("hidden") ||
     !activeLevel
@@ -590,6 +857,21 @@ function handleKeydown(event) {
 document
   .querySelector("#home-button")
   .addEventListener("click", () => showScreen("map"));
+document.querySelector("#challenge-button").addEventListener("click", () => {
+  showChallengeScreen();
+});
+document
+  .querySelector("#challenge-back-button")
+  .addEventListener("click", () => showScreen("map"));
+document
+  .querySelector("#challenge-trainer-back-button")
+  .addEventListener("click", () => showScreen("challenge"));
+document
+  .querySelector("#challenge-retry-button")
+  .addEventListener("click", () => startChallenge(activeChallenge.id));
+document
+  .querySelector("#challenge-list-button")
+  .addEventListener("click", () => showScreen("challenge"));
 document
   .querySelector("#guide-button")
   .addEventListener("click", () => {
@@ -645,12 +927,27 @@ fetch("/api/courses")
   })
   .then((data) => {
     courses = data;
+    coursesReady = true;
     renderMap();
-    restoreInitialScreen();
+    tryRestoreInitialScreen();
   })
   .catch(() => {
     document.querySelector("#courses-container").innerHTML =
       "<p>Не получилось загрузить курсы. Попробуй обновить страницу.</p>";
+  });
+
+fetch("/api/challenges")
+  .then((response) => {
+    if (!response.ok) throw new Error("Не удалось загрузить челленджи");
+    return response.json();
+  })
+  .then((data) => {
+    challenges = data;
+    if (!screens.challenge.classList.contains("hidden")) renderChallenges();
+  })
+  .catch(() => {
+    document.querySelector("#challenge-list").innerHTML =
+      "<p>Не получилось загрузить тексты. Попробуй обновить страницу.</p>";
   });
 
 async function syncPendingSessions() {
@@ -697,5 +994,9 @@ initializeAccount({
     persistProgress(progress);
     clearPendingSessions();
     if (courses.length) renderMap();
+  },
+  onReady: () => {
+    accountReady = true;
+    tryRestoreInitialScreen();
   },
 });
