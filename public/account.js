@@ -40,6 +40,15 @@ function showMessage(message, isError = false, target = "#account-message") {
   element.className = `${element.dataset.messageClass}${isError ? " error" : ""}`;
 }
 
+function isAuthenticated() {
+  return Boolean(currentUser);
+}
+
+function openAccountDialog() {
+  showMessage("");
+  document.querySelector("#account-dialog").showModal();
+}
+
 async function submitCredentials(event, path) {
   event.preventDefault();
   const form = event.currentTarget;
@@ -160,8 +169,7 @@ async function initializeAccount(callbacks = {}) {
       openProfile();
       return;
     }
-    showMessage("");
-    dialog.showModal();
+    openAccountDialog();
   });
   document.querySelector("#account-close").addEventListener("click", () => dialog.close());
   document.querySelector("#profile-open-button").addEventListener("click", openProfile);
@@ -213,8 +221,16 @@ async function recordTypingSession(session) {
   });
 }
 
-async function fetchLeaderboard() {
-  return apiRequest("/api/leaderboard");
+async function fetchLeaderboard(limit) {
+  const search = Number.isInteger(limit) ? `?limit=${limit}` : "";
+  return apiRequest(`/api/leaderboard${search}`);
 }
 
-export { fetchLeaderboard, initializeAccount, mergeServerProgress, recordTypingSession };
+export {
+  fetchLeaderboard,
+  initializeAccount,
+  isAuthenticated,
+  mergeServerProgress,
+  openAccountDialog,
+  recordTypingSession,
+};

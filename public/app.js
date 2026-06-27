@@ -1,7 +1,9 @@
 import {
   fetchLeaderboard,
   initializeAccount,
+  isAuthenticated,
   mergeServerProgress,
+  openAccountDialog,
   recordTypingSession,
 } from "./account.js";
 import { russianLayout } from "./keyboard-layouts.js";
@@ -479,10 +481,22 @@ function createLeaderboardRow(participant) {
 
 async function renderLeaderboard() {
   const list = document.querySelector("#leaderboard-list");
+  const guestPanel = document.querySelector("#leaderboard-guest-panel");
+  const guestMessage = document.querySelector("#leaderboard-guest-message");
+  const guest = !isAuthenticated();
+  const pendingSessions = loadPendingSessions();
+
+  guestPanel.classList.toggle("hidden", !guest);
+  if (guest) {
+    guestMessage.textContent = pendingSessions.length
+      ? "Твои гостевые результаты ждут входа, чтобы попасть в рейтинг."
+      : "Войди, чтобы попасть в рейтинг и видеть полный список участников.";
+  }
+
   list.innerHTML = '<p class="leaderboard-empty">Загружаем рейтинг…</p>';
 
   try {
-    const data = await fetchLeaderboard();
+    const data = await fetchLeaderboard(guest ? 5 : undefined);
     list.innerHTML = "";
     if (!data.participants.length) {
       list.innerHTML =
@@ -596,6 +610,9 @@ document
   .querySelector("#leaderboard-refresh-button")
   .addEventListener("click", renderLeaderboard);
 document
+  .querySelector("#leaderboard-login-button")
+  .addEventListener("click", openAccountDialog);
+document
   .querySelector("#guide-back-button")
   .addEventListener("click", () => showScreen("map"));
 document
@@ -665,6 +682,7 @@ initializeAccount({
     });
     persistProgress(progress);
     if (courses.length) renderMap();
+    if (!screens.leaderboard.classList.contains("hidden")) renderLeaderboard();
   },
   onLoggedOut: () => {
     progress = normalizeProgress({ stars: {} });
