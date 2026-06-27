@@ -1,4 +1,9 @@
-import { initializeAccount, mergeServerProgress } from "./account.js";
+import {
+  fetchLeaderboard,
+  initializeAccount,
+  mergeServerProgress,
+  recordTypingSession,
+} from "./account.js";
 import { russianLayout } from "./keyboard-layouts.js";
 import {
   levelKey,
@@ -21,6 +26,7 @@ const FINGER_COLOR_CLASSES = activeLayout.fingerColorClasses;
 const screens = {
   map: document.querySelector("#map-screen"),
   guide: document.querySelector("#guide-screen"),
+  leaderboard: document.querySelector("#leaderboard-screen"),
   profile: document.querySelector("#profile-screen"),
   trainer: document.querySelector("#trainer-screen"),
   result: document.querySelector("#result-screen"),
@@ -34,6 +40,7 @@ let attempts = 0;
 let mistakes = 0;
 let wrongFlash = false;
 let keyboardLayout = "unknown";
+let levelStartedAt = 0;
 let progress = loadProgress();
 
 function showScreen(name) {
@@ -164,6 +171,7 @@ function startLevel(courseId, levelId) {
   mistakes = 0;
   wrongFlash = false;
   keyboardLayout = "unknown";
+  levelStartedAt = Date.now();
   document.querySelector("#lesson-number").textContent =
     `${activeCourse.title} · занятие ${activeLevel.id} из ${activeCourse.levels.length}`;
   document.querySelector("#lesson-title").textContent = activeLevel.title;
@@ -335,10 +343,20 @@ function focusResultAction(action = "next") {
 function finishLevel() {
   const accuracy = Math.round(((attempts - mistakes) / attempts) * 100);
   const stars = accuracy >= 95 ? 3 : accuracy >= 80 ? 2 : 1;
+  const durationSeconds = Math.max(1, Math.round((Date.now() - levelStartedAt) / 1000));
   const key = levelKey(activeCourse.id, activeLevel.id);
   progress.stars[key] = Math.max(progress.stars[key] || 0, stars);
   persistProgress(progress);
   mergeServerProgress(progress.stars).catch(() => {});
+  recordTypingSession({
+    courseId: activeCourse.id,
+    levelId: activeLevel.id,
+    stars,
+    accuracy,
+    attempts,
+    mistakes,
+    durationSeconds,
+  }).catch(() => {});
   renderMap();
 
   document.querySelector("#result-stars").textContent =
@@ -352,6 +370,71 @@ function finishLevel() {
     : "К карте курсов";
   showScreen("result");
   focusResultAction();
+}
+
+function formatPracticeTime(seconds) {
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 1) return "меньше минуты";
+  if (minutes === 1) return "1 минута";
+  return `${minutes} мин.`;
+}
+
+function createLeaderboardRow(participant) {
+  const row = document.createElement("article");
+  row.className = "leaderboard-row";
+
+  const rank = document.createElement("strong");
+  rank.className = "leaderboard-rank";
+  rank.textContent = `#${participant.rank}`;
+
+  const name = document.createElement("div");
+  name.className = "leaderboard-name";
+  const title = document.createElement("h3");
+  title.textContent = participant.displayName;
+  const caption = document.createElement("p");
+  caption.textContent = `В практике ${formatPracticeTime(participant.practiceSeconds)}`;
+  name.append(title, caption);
+
+  const completed = document.createElement("span");
+  completed.innerHTML = "<small>занятий</small>";
+  completed.append(String(participant.completedLessons));
+
+  const rewards = document.createElement("span");
+  rewards.innerHTML = "<small>звёзд</small>";
+  rewards.append(String(participant.rewards));
+
+  const accuracy = document.createElement("span");
+  accuracy.innerHTML = "<small>точность</small>";
+  accuracy.append(`${participant.averageAccuracy}%`);
+
+  const score = document.createElement("span");
+  score.className = "leaderboard-score";
+  score.innerHTML = "<small>очки</small>";
+  score.append(String(participant.score));
+
+  row.append(rank, name, completed, rewards, accuracy, score);
+  return row;
+}
+
+async function renderLeaderboard() {
+  const list = document.querySelector("#leaderboard-list");
+  list.innerHTML = '<p class="leaderboard-empty">Загружаем рейтинг…</p>';
+
+  try {
+    const data = await fetchLeaderboard();
+    list.innerHTML = "";
+    if (!data.participants.length) {
+      list.innerHTML =
+        '<p class="leaderboard-empty">Пока рейтинг пуст. Первые участники появятся после занятий из аккаунта с заполненным именем.</p>';
+      return;
+    }
+    data.participants.forEach((participant) => {
+      list.append(createLeaderboardRow(participant));
+    });
+  } catch {
+    list.innerHTML =
+      '<p class="leaderboard-empty error">Не получилось загрузить рейтинг. Попробуй обновить страницу чуть позже.</p>';
+  }
 }
 
 function processInput(typed) {
@@ -438,6 +521,16 @@ document
     renderGuideKeyboard();
     showScreen("guide");
   });
+document.querySelector("#leaderboard-button").addEventListener("click", () => {
+  renderLeaderboard();
+  showScreen("leaderboard");
+});
+document
+  .querySelector("#leaderboard-back-button")
+  .addEventListener("click", () => showScreen("map"));
+document
+  .querySelector("#leaderboard-refresh-button")
+  .addEventListener("click", renderLeaderboard);
 document
   .querySelector("#guide-back-button")
   .addEventListener("click", () => showScreen("map"));

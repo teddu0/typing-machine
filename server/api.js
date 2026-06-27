@@ -2,6 +2,7 @@ import { courses } from "../data/courses.js";
 import { config } from "./config.js";
 import { findUserBySessionToken, login, logout, register, SESSION_SECONDS } from "./auth-service.js";
 import { assertSameOrigin, parseCookies, readJson, sendJson, sessionCookie } from "./http.js";
+import { getLeaderboard, recordTypingSession } from "./leaderboard-service.js";
 import { getProgress, mergeProgress, resetProgress } from "./progress-service.js";
 import { changePassword, updateProfile } from "./profile-service.js";
 import { query } from "./db.js";
@@ -49,6 +50,11 @@ async function handleApi(request, response, url) {
 
   if (request.method === "GET" && url.pathname === "/api/courses") {
     sendJson(response, 200, courses);
+    return true;
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/leaderboard") {
+    sendJson(response, 200, await getLeaderboard(url.searchParams.get("limit")));
     return true;
   }
 
@@ -112,6 +118,12 @@ async function handleApi(request, response, url) {
     const user = await requireUser(request);
     const body = await readJson(request);
     sendJson(response, 200, await mergeProgress(user.id, body.stars));
+    return true;
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/typing-sessions") {
+    const user = await requireUser(request);
+    sendJson(response, 201, await recordTypingSession(user.id, await readJson(request)));
     return true;
   }
 

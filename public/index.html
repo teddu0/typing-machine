@@ -15,6 +15,7 @@
         <span>Клавишки</span>
       </button>
       <div class="header-actions">
+        <button class="leaderboard-button" id="leaderboard-button" type="button">Рейтинг</button>
         <button class="account-button" id="account-button" type="button">Войти</button>
         <button class="guide-button" id="guide-button" type="button">
           <span aria-hidden="true">?</span>
@@ -146,6 +147,33 @@
         <div class="guide-finish">
           <p>Плечи опущены, локти рядом с телом, спина ровная. Сделай спокойный вдох — теперь можно печатать.</p>
           <button class="primary-button" id="guide-start-button" type="button">Я готов начать</button>
+        </div>
+      </section>
+
+      <section id="leaderboard-screen" class="screen hidden">
+        <button class="back-button" id="leaderboard-back-button" type="button">← К карте курсов</button>
+        <div class="leaderboard-hero">
+          <div>
+            <p class="eyebrow">Дружеский рейтинг</p>
+            <h1>Печатальщики<br><span>Клавишек</span></h1>
+            <p>Здесь видны участники, которые указали имя в профиле и проходят занятия из аккаунта. Пока показываем только отображаемое имя и простую учебную статистику.</p>
+          </div>
+          <div class="leaderboard-note" aria-hidden="true">
+            <strong>+10</strong>
+            <span>за новое занятие</span>
+            <strong>+3</strong>
+            <span>за каждую звезду</span>
+          </div>
+        </div>
+        <div class="leaderboard-card">
+          <div class="leaderboard-head">
+            <div>
+              <p class="eyebrow">Таблица</p>
+              <h2>Кто тренируется чаще</h2>
+            </div>
+            <button class="secondary-button" id="leaderboard-refresh-button" type="button">Обновить</button>
+          </div>
+          <div class="leaderboard-list" id="leaderboard-list" aria-live="polite"></div>
         </div>
       </section>
 

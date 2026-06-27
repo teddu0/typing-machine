@@ -72,6 +72,8 @@ const context = vm.createContext({
   localStorage,
   normalizeProgress,
   mergeServerProgress: () => Promise.resolve(null),
+  recordTypingSession: () => Promise.resolve(null),
+  fetchLeaderboard: () => Promise.resolve({ participants: [] }),
   persistProgress: (progress) => saveProgress(progress, localStorage),
   russianLayout,
   setTimeout,

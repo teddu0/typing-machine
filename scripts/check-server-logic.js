@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { hashPassword, verifyPassword } from "../server/security.js";
+import { normalizeTypingSession } from "../server/leaderboard-service.js";
 import { openapi } from "../server/openapi.js";
 import { normalizeStars } from "../server/progress-service.js";
 import {
@@ -73,8 +74,10 @@ assert.equal(await verifyPassword("wrong password", passwordHash), false);
 assert.equal(openapi.openapi, "3.1.0");
 assert.ok(openapi.paths["/api/auth/register"].post);
 assert.ok(openapi.paths["/api/profile"].patch);
+assert.ok(openapi.paths["/api/leaderboard"].get);
 assert.ok(openapi.paths["/api/progress/merge"].post);
 assert.ok(openapi.paths["/api/progress"].delete);
+assert.ok(openapi.paths["/api/typing-sessions"].post);
 assert.ok(openapi.components.securitySchemes.sessionCookie);
 assert.deepEqual(normalizeStars({
   "middle:1": 2,
@@ -85,5 +88,35 @@ assert.deepEqual(normalizeStars({
   "middle:1": 2,
   "middle:2": 3,
 });
+assert.deepEqual(normalizeTypingSession({
+  courseId: "middle",
+  levelId: 1,
+  stars: 4,
+  accuracy: 101,
+  attempts: 12,
+  mistakes: 2,
+  durationSeconds: 45,
+}), {
+  courseId: "middle",
+  levelId: 1,
+  stars: 3,
+  accuracy: 100,
+  attempts: 12,
+  mistakes: 2,
+  durationSeconds: 45,
+});
+assert.throws(
+  () => normalizeTypingSession({ courseId: "bad", levelId: 1, attempts: 1, mistakes: 0 }),
+  /Неизвестное занятие/,
+);
+assert.throws(
+  () => normalizeTypingSession({
+    courseId: "middle",
+    levelId: 1,
+    attempts: 2,
+    mistakes: 3,
+  }),
+  /Некорректная статистика/,
+);
 
 console.log("Проверена серверная логика регистрации, профиля и паролей");

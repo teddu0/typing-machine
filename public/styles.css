@@ -38,7 +38,8 @@ button { font: inherit; }
   gap: 12px;
 }
 
-.guide-button {
+.guide-button,
+.leaderboard-button {
   min-height: 42px;
   padding: 0 15px;
   display: flex;
@@ -50,6 +51,12 @@ button { font: inherit; }
   background: #f5f2ff;
   font-weight: 900;
   cursor: pointer;
+}
+
+.leaderboard-button {
+  color: #2f7a58;
+  border-color: #b9e7ce;
+  background: #effbf5;
 }
 
 .guide-button span {
@@ -482,6 +489,146 @@ h1 span { color: var(--purple); }
 .guide-intro {
   max-width: 760px;
   margin-bottom: 32px;
+}
+
+.leaderboard-hero {
+  padding: clamp(28px, 6vw, 56px);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 26px;
+  align-items: center;
+  border: 3px solid white;
+  border-radius: 36px;
+  background: linear-gradient(135deg, #fffdf8, #edf9f2);
+  box-shadow: var(--shadow);
+}
+
+.leaderboard-hero h1 {
+  margin-bottom: 14px;
+  font-size: clamp(38px, 6vw, 64px);
+}
+
+.leaderboard-hero p:not(.eyebrow) {
+  max-width: 680px;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.leaderboard-note {
+  min-width: 190px;
+  padding: 24px;
+  display: grid;
+  gap: 5px;
+  border: 3px dashed #b9e7ce;
+  border-radius: 28px;
+  background: white;
+  text-align: center;
+  transform: rotate(2deg);
+}
+
+.leaderboard-note strong {
+  color: #2f7a58;
+  font-size: 34px;
+}
+
+.leaderboard-note span {
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.leaderboard-card {
+  margin-top: 28px;
+  padding: clamp(20px, 4vw, 30px);
+  border: 2px solid white;
+  border-radius: 28px;
+  background: rgba(255, 253, 248, 0.92);
+  box-shadow: var(--shadow);
+}
+
+.leaderboard-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.leaderboard-head h2 {
+  margin: 0;
+  font-size: 34px;
+}
+
+.leaderboard-list {
+  margin-top: 22px;
+  display: grid;
+  gap: 12px;
+}
+
+.leaderboard-row {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 70px minmax(180px, 1fr) repeat(4, minmax(82px, auto));
+  align-items: center;
+  gap: 14px;
+  border: 2px solid #edf0e7;
+  border-radius: 20px;
+  background: white;
+}
+
+.leaderboard-rank {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  color: white;
+  background: var(--purple);
+  box-shadow: 0 5px 0 var(--purple-dark);
+  font-size: 18px;
+}
+
+.leaderboard-name h3 {
+  margin: 0 0 5px;
+  font-size: 20px;
+}
+
+.leaderboard-name p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.leaderboard-row span {
+  display: grid;
+  gap: 3px;
+  justify-items: end;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.leaderboard-row small {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.leaderboard-score {
+  color: #2f7a58;
+}
+
+.leaderboard-empty {
+  margin: 0;
+  padding: 22px;
+  border-radius: 18px;
+  color: var(--muted);
+  background: white;
+  font-weight: 900;
+  text-align: center;
+}
+
+.leaderboard-empty.error {
+  color: #b3443d;
+  background: #fff1ef;
 }
 
 .account-button {
@@ -1067,11 +1214,22 @@ h1 span { color: var(--purple); }
 
 @media (max-width: 520px) {
   .site-header { padding: 14px 0; }
-  .header-actions { gap: 6px; }
+  .header-actions { gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
   .account-button { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .account-forms { grid-template-columns: 1fr; }
   .profile-grid { grid-template-columns: 1fr; }
   .guide-button { width: 42px; padding: 0; justify-content: center; font-size: 0; }
+  .leaderboard-button { min-height: 38px; padding: 0 12px; }
+  .leaderboard-hero { grid-template-columns: 1fr; padding: 28px 22px; border-radius: 24px; }
+  .leaderboard-note { min-width: 0; transform: none; }
+  .leaderboard-head { align-items: start; flex-direction: column; }
+  .leaderboard-row {
+    grid-template-columns: 54px 1fr;
+    align-items: start;
+  }
+  .leaderboard-row span {
+    justify-items: start;
+  }
   main { width: min(100% - 20px, 1120px); }
   .hero { padding: 28px 22px; border-radius: 24px; }
   .hero h1 { font-size: 38px; }

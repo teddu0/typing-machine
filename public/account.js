@@ -205,4 +205,16 @@ async function mergeServerProgress(stars) {
   });
 }
 
-export { initializeAccount, mergeServerProgress };
+async function recordTypingSession(session) {
+  if (!currentUser) return null;
+  return apiRequest("/api/typing-sessions", {
+    method: "POST",
+    body: JSON.stringify(session),
+  });
+}
+
+async function fetchLeaderboard() {
+  return apiRequest("/api/leaderboard");
+}
+
+export { fetchLeaderboard, initializeAccount, mergeServerProgress, recordTypingSession };
