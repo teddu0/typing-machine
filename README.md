@@ -148,6 +148,7 @@ Backend написан на Node.js без серверного фреймвор
 - `/api/profile*` — данные профиля и смена пароля.
 - `/api/progress*` — получение, объединение и обнуление прогресса.
 - `/api/leaderboard` и `/api/typing-sessions` — рейтинг и запись завершённых занятий.
+- `/api/challenge-leaderboard` и `/api/challenge-results` — рейтинг и запись результатов челленджей.
 - `/api/challenges` — тексты челленджей для перепечатки.
 - `/api/courses` — учебные курсы.
 - `/api/health` — проверка приложения и PostgreSQL.

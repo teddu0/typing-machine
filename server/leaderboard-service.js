@@ -1,4 +1,5 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
+import { challenges } from "../data/challenges.js";
 import { courses } from "../data/courses.js";
 import { query } from "./db.js";
 
@@ -8,6 +9,7 @@ const MAX_DURATION_SECONDS = 24 * 60 * 60;
 const validLevels = new Set(
   courses.flatMap((course) => course.levels.map((level) => `${course.id}:${level.id}`)),
 );
+const challengesById = new Map(challenges.map((challenge) => [challenge.id, challenge]));
 const leaderboardQuery = `WITH participant_ids AS (
        SELECT user_id FROM progress
        UNION
@@ -72,6 +74,59 @@ const leaderboardQuery = `WITH participant_ids AS (
      ORDER BY rank
      LIMIT $1`;
 
+const challengeLeaderboardQuery = `WITH best_results AS (
+       SELECT DISTINCT ON (challenge_results.user_id)
+         challenge_results.id,
+         challenge_results.user_id,
+         challenge_results.challenge_id,
+         challenge_results.challenge_title,
+         challenge_results.difficulty,
+         challenge_results.accuracy,
+         challenge_results.duration_seconds,
+         challenge_results.chars_per_minute,
+         challenge_results.mistakes,
+         challenge_results.characters_count,
+         challenge_results.completed_at
+       FROM challenge_results
+       WHERE challenge_results.challenge_id = $1
+       ORDER BY
+         challenge_results.user_id,
+         challenge_results.accuracy DESC,
+         challenge_results.duration_seconds ASC,
+         challenge_results.chars_per_minute DESC,
+         challenge_results.mistakes ASC,
+         challenge_results.completed_at ASC
+     ),
+     ranked AS (
+       SELECT
+         best_results.id,
+         best_results.user_id,
+         COALESCE(NULLIF(btrim(users.display_name), ''), users.email) AS leaderboard_name,
+         best_results.challenge_id,
+         best_results.challenge_title,
+         best_results.difficulty,
+         best_results.accuracy,
+         best_results.duration_seconds,
+         best_results.chars_per_minute,
+         best_results.mistakes,
+         best_results.characters_count,
+         best_results.completed_at,
+         ROW_NUMBER() OVER (
+           ORDER BY
+             best_results.accuracy DESC,
+             best_results.duration_seconds ASC,
+             best_results.chars_per_minute DESC,
+             best_results.mistakes ASC,
+             best_results.completed_at ASC
+         )::int AS rank
+       FROM best_results
+       JOIN users ON users.id = best_results.user_id
+     )
+     SELECT *
+     FROM ranked
+     ORDER BY rank
+     LIMIT $2`;
+
 function normalizeInteger(value, fallback) {
   const number = Number(value);
   return Number.isInteger(number) ? number : fallback;
@@ -115,6 +170,56 @@ function normalizeTypingSession(body) {
   };
 }
 
+function challengeTextHash(challenge) {
+  return createHash("sha256").update(challenge.text).digest("hex");
+}
+
+function normalizeChallengeResult(body) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    const error = new Error("Передайте результат челленджа");
+    error.status = 400;
+    throw error;
+  }
+
+  const challengeId = String(body.challengeId || "").trim();
+  const challenge = challengesById.get(challengeId);
+  if (!challenge) {
+    const error = new Error("Неизвестный челлендж");
+    error.status = 400;
+    throw error;
+  }
+
+  const attempts = normalizeInteger(body.attempts, 0);
+  const mistakes = normalizeInteger(body.mistakes, 0);
+  if (attempts <= 0 || mistakes < 0 || mistakes > attempts) {
+    const error = new Error("Некорректная статистика челленджа");
+    error.status = 400;
+    throw error;
+  }
+
+  const durationSeconds = clamp(normalizeInteger(body.durationSeconds, 1), 1, MAX_DURATION_SECONDS);
+  const accuracy = clamp(normalizeInteger(body.accuracy, 0), 0, 100);
+  const charactersCount = challenge.text.length;
+  const charsPerMinute = clamp(
+    normalizeInteger(body.charsPerMinute, Math.round((charactersCount / durationSeconds) * 60)),
+    0,
+    10000,
+  );
+
+  return {
+    challengeId,
+    challengeTitle: challenge.title,
+    difficulty: challenge.difficulty,
+    textHash: challengeTextHash(challenge),
+    charactersCount,
+    accuracy,
+    attempts,
+    mistakes,
+    durationSeconds,
+    charsPerMinute,
+  };
+}
+
 function normalizeLimit(value) {
   if (value === null || value === undefined || value === "") return DEFAULT_LIMIT;
   return clamp(normalizeInteger(value, DEFAULT_LIMIT), 1, MAX_LIMIT);
@@ -141,6 +246,31 @@ async function recordTypingSession(userId, body) {
   return { status: "ok" };
 }
 
+async function recordChallengeResult(userId, body) {
+  const result = normalizeChallengeResult(body);
+  await query(
+    `INSERT INTO challenge_results
+       (id, user_id, challenge_id, challenge_title, difficulty, text_hash, characters_count,
+        accuracy, attempts, mistakes, duration_seconds, chars_per_minute)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+    [
+      randomUUID(),
+      userId,
+      result.challengeId,
+      result.challengeTitle,
+      result.difficulty,
+      result.textHash,
+      result.charactersCount,
+      result.accuracy,
+      result.attempts,
+      result.mistakes,
+      result.durationSeconds,
+      result.charsPerMinute,
+    ],
+  );
+  return { status: "ok" };
+}
+
 async function getLeaderboard(limitValue) {
   const limit = normalizeLimit(limitValue);
   const result = await query(leaderboardQuery, [limit]);
@@ -160,10 +290,50 @@ async function getLeaderboard(limitValue) {
   };
 }
 
+async function getChallengeLeaderboard(challengeIdValue, limitValue) {
+  const challengeId = String(challengeIdValue || "").trim();
+  const challenge = challengesById.get(challengeId);
+  if (!challenge) {
+    const error = new Error("Неизвестный челлендж");
+    error.status = 400;
+    throw error;
+  }
+
+  const limit = normalizeLimit(limitValue);
+  const result = await query(challengeLeaderboardQuery, [challengeId, limit]);
+
+  return {
+    challenge: {
+      id: challenge.id,
+      title: challenge.title,
+      difficulty: challenge.difficulty,
+      textLength: challenge.text.length,
+    },
+    participants: result.rows.map((row) => ({
+      rank: row.rank,
+      id: row.user_id,
+      displayName: row.leaderboard_name,
+      challengeId: row.challenge_id,
+      challengeTitle: row.challenge_title,
+      difficulty: row.difficulty,
+      accuracy: row.accuracy,
+      durationSeconds: row.duration_seconds,
+      charsPerMinute: row.chars_per_minute,
+      mistakes: row.mistakes,
+      charactersCount: row.characters_count,
+      completedAt: row.completed_at,
+    })),
+  };
+}
+
 export {
+  challengeLeaderboardQuery,
+  getChallengeLeaderboard,
   getLeaderboard,
   leaderboardQuery,
+  normalizeChallengeResult,
   normalizeLimit,
   normalizeTypingSession,
+  recordChallengeResult,
   recordTypingSession,
 };

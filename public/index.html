@@ -243,6 +243,20 @@
             </div>
             <button class="secondary-button" id="leaderboard-refresh-button" type="button">Обновить</button>
           </div>
+          <div class="leaderboard-tabs" role="tablist" aria-label="Тип рейтинга">
+            <button class="leaderboard-tab active" id="leaderboard-lessons-tab" type="button" aria-selected="true">Занятия</button>
+            <button class="leaderboard-tab" id="leaderboard-challenges-tab" type="button" aria-selected="false">Челленджи</button>
+          </div>
+          <div class="challenge-leaderboard-filters hidden" id="challenge-leaderboard-filters">
+            <label>
+              Сложность
+              <select id="challenge-difficulty-filter"></select>
+            </label>
+            <label>
+              Текст
+              <select id="challenge-text-filter"></select>
+            </label>
+          </div>
           <div class="leaderboard-guest-panel hidden" id="leaderboard-guest-panel">
             <div>
               <strong>Сейчас виден топ-5 рейтинга</strong>

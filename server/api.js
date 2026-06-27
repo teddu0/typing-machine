@@ -3,7 +3,12 @@ import { challenges } from "../data/challenges.js";
 import { config } from "./config.js";
 import { findUserBySessionToken, login, logout, register, SESSION_SECONDS } from "./auth-service.js";
 import { assertSameOrigin, parseCookies, readJson, sendJson, sessionCookie } from "./http.js";
-import { getLeaderboard, recordTypingSession } from "./leaderboard-service.js";
+import {
+  getChallengeLeaderboard,
+  getLeaderboard,
+  recordChallengeResult,
+  recordTypingSession,
+} from "./leaderboard-service.js";
 import { getProgress, mergeProgress, resetProgress } from "./progress-service.js";
 import { changePassword, updateProfile } from "./profile-service.js";
 import { query } from "./db.js";
@@ -61,6 +66,18 @@ async function handleApi(request, response, url) {
 
   if (request.method === "GET" && url.pathname === "/api/leaderboard") {
     sendJson(response, 200, await getLeaderboard(url.searchParams.get("limit")));
+    return true;
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/challenge-leaderboard") {
+    sendJson(
+      response,
+      200,
+      await getChallengeLeaderboard(
+        url.searchParams.get("challengeId"),
+        url.searchParams.get("limit"),
+      ),
+    );
     return true;
   }
 
@@ -130,6 +147,12 @@ async function handleApi(request, response, url) {
   if (request.method === "POST" && url.pathname === "/api/typing-sessions") {
     const user = await requireUser(request);
     sendJson(response, 201, await recordTypingSession(user.id, await readJson(request)));
+    return true;
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/challenge-results") {
+    const user = await requireUser(request);
+    sendJson(response, 201, await recordChallengeResult(user.id, await readJson(request)));
     return true;
   }
 

@@ -225,16 +225,32 @@ async function recordTypingSession(session) {
   });
 }
 
+async function recordChallengeResult(result) {
+  if (!currentUser) return null;
+  return apiRequest("/api/challenge-results", {
+    method: "POST",
+    body: JSON.stringify(result),
+  });
+}
+
 async function fetchLeaderboard(limit) {
   const search = Number.isInteger(limit) ? `?limit=${limit}` : "";
   return apiRequest(`/api/leaderboard${search}`);
 }
 
+async function fetchChallengeLeaderboard(challengeId, limit) {
+  const params = new URLSearchParams({ challengeId });
+  if (Number.isInteger(limit)) params.set("limit", String(limit));
+  return apiRequest(`/api/challenge-leaderboard?${params}`);
+}
+
 export {
+  fetchChallengeLeaderboard,
   fetchLeaderboard,
   initializeAccount,
   isAuthenticated,
   mergeServerProgress,
   openAccountDialog,
+  recordChallengeResult,
   recordTypingSession,
 };

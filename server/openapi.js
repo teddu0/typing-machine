@@ -102,6 +102,38 @@ const openapi = {
         },
       },
     },
+    "/api/challenge-leaderboard": {
+      get: {
+        tags: ["Leaderboard"],
+        summary: "Получить рейтинг по конкретному челленджу",
+        parameters: [
+          {
+            name: "challengeId",
+            in: "query",
+            required: true,
+            schema: { type: "string", examples: ["warm-home"] },
+          },
+          {
+            name: "limit",
+            in: "query",
+            required: false,
+            schema: { type: "integer", minimum: 1, maximum: 100, default: 50 },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Список результатов по выбранному челленджу",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ChallengeLeaderboardResponse" },
+              },
+            },
+          },
+          400: errorResponse,
+          500: errorResponse,
+        },
+      },
+    },
     "/api/auth/me": {
       get: {
         tags: ["Auth"],
@@ -287,6 +319,37 @@ const openapi = {
         },
       },
     },
+    "/api/challenge-results": {
+      post: {
+        tags: ["Leaderboard"],
+        summary: "Записать результат челленджа",
+        security: [{ sessionCookie: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ChallengeResultInput" },
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: "Результат записан",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: { status: { type: "string", examples: ["ok"] } },
+                  required: ["status"],
+                },
+              },
+            },
+          },
+          400: errorResponse,
+          401: errorResponse,
+        },
+      },
+    },
   },
   components: {
     securitySchemes: {
@@ -362,6 +425,18 @@ const openapi = {
         },
         required: ["courseId", "levelId", "stars", "accuracy", "attempts", "mistakes", "durationSeconds"],
       },
+      ChallengeResultInput: {
+        type: "object",
+        properties: {
+          challengeId: { type: "string", examples: ["warm-home"] },
+          accuracy: { type: "integer", minimum: 0, maximum: 100 },
+          attempts: { type: "integer", minimum: 1 },
+          mistakes: { type: "integer", minimum: 0 },
+          durationSeconds: { type: "integer", minimum: 1 },
+          charsPerMinute: { type: "integer", minimum: 0 },
+        },
+        required: ["challengeId", "accuracy", "attempts", "mistakes", "durationSeconds", "charsPerMinute"],
+      },
       LeaderboardParticipant: {
         type: "object",
         properties: {
@@ -387,6 +462,37 @@ const openapi = {
           "lastCompletedAt",
         ],
       },
+      ChallengeLeaderboardParticipant: {
+        type: "object",
+        properties: {
+          rank: { type: "integer", minimum: 1 },
+          id: { type: "string", format: "uuid" },
+          displayName: { type: "string" },
+          challengeId: { type: "string" },
+          challengeTitle: { type: "string" },
+          difficulty: { type: "string" },
+          accuracy: { type: "integer", minimum: 0, maximum: 100 },
+          durationSeconds: { type: "integer", minimum: 1 },
+          charsPerMinute: { type: "integer", minimum: 0 },
+          mistakes: { type: "integer", minimum: 0 },
+          charactersCount: { type: "integer", minimum: 1 },
+          completedAt: { type: "string", format: "date-time" },
+        },
+        required: [
+          "rank",
+          "id",
+          "displayName",
+          "challengeId",
+          "challengeTitle",
+          "difficulty",
+          "accuracy",
+          "durationSeconds",
+          "charsPerMinute",
+          "mistakes",
+          "charactersCount",
+          "completedAt",
+        ],
+      },
       LeaderboardResponse: {
         type: "object",
         properties: {
@@ -396,6 +502,26 @@ const openapi = {
           },
         },
         required: ["participants"],
+      },
+      ChallengeLeaderboardResponse: {
+        type: "object",
+        properties: {
+          challenge: {
+            type: "object",
+            properties: {
+              id: { type: "string" },
+              title: { type: "string" },
+              difficulty: { type: "string" },
+              textLength: { type: "integer", minimum: 1 },
+            },
+            required: ["id", "title", "difficulty", "textLength"],
+          },
+          participants: {
+            type: "array",
+            items: { $ref: "#/components/schemas/ChallengeLeaderboardParticipant" },
+          },
+        },
+        required: ["challenge", "participants"],
       },
       Error: {
         type: "object",

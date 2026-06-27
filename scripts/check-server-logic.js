@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { hashPassword, verifyPassword } from "../server/security.js";
 import {
   leaderboardQuery,
+  normalizeChallengeResult,
   normalizeLimit,
   normalizeTypingSession,
 } from "../server/leaderboard-service.js";
@@ -80,9 +81,11 @@ assert.ok(openapi.paths["/api/challenges"].get);
 assert.ok(openapi.paths["/api/auth/register"].post);
 assert.ok(openapi.paths["/api/profile"].patch);
 assert.ok(openapi.paths["/api/leaderboard"].get);
+assert.ok(openapi.paths["/api/challenge-leaderboard"].get);
 assert.ok(openapi.paths["/api/progress/merge"].post);
 assert.ok(openapi.paths["/api/progress"].delete);
 assert.ok(openapi.paths["/api/typing-sessions"].post);
+assert.ok(openapi.paths["/api/challenge-results"].post);
 assert.ok(openapi.components.securitySchemes.sessionCookie);
 assert.match(
   leaderboardQuery,
@@ -95,6 +98,15 @@ assert.equal(normalizeLimit(""), 50);
 assert.equal(normalizeLimit("2"), 2);
 assert.equal(normalizeLimit("0"), 1);
 assert.equal(normalizeLimit("200"), 100);
+assert.equal(normalizeChallengeResult({
+  challengeId: "warm-home",
+  accuracy: 99,
+  attempts: 60,
+  mistakes: 1,
+  durationSeconds: 45,
+  charsPerMinute: 70,
+}).challengeTitle, "Тихий старт");
+assert.throws(() => normalizeChallengeResult({ challengeId: "missing" }), /Неизвестный челлендж/);
 assert.deepEqual(normalizeStars({
   "middle:1": 2,
   "middle:2": 3,

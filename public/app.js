@@ -1,9 +1,11 @@
 import {
+  fetchChallengeLeaderboard,
   fetchLeaderboard,
   initializeAccount,
   isAuthenticated,
   mergeServerProgress,
   openAccountDialog,
+  recordChallengeResult,
   recordTypingSession,
 } from "./account.js";
 import { russianLayout } from "./keyboard-layouts.js";
@@ -58,6 +60,9 @@ let challengeStartedAt = 0;
 let challengeTimerId = null;
 let challengeWrongFlash = false;
 let challengeKeyboardLayout = "unknown";
+let leaderboardMode = "lessons";
+let selectedChallengeDifficulty = "all";
+let selectedLeaderboardChallengeId = "";
 let position = 0;
 let attempts = 0;
 let mistakes = 0;
@@ -638,6 +643,14 @@ function finishChallenge() {
   const durationSeconds = Math.max(1, challengeElapsedSeconds());
   const charsPerMinute = Math.round((activeChallenge.text.length / durationSeconds) * 60);
   stopChallengeTimer();
+  recordChallengeResult({
+    challengeId: activeChallenge.id,
+    accuracy,
+    attempts: challengeAttempts,
+    mistakes: challengeMistakes,
+    durationSeconds,
+    charsPerMinute,
+  }).catch(() => {});
 
   document.querySelector("#challenge-result-title").textContent =
     accuracy >= 95 ? "Очень ровно!" : "Челлендж завершён!";
@@ -715,6 +728,134 @@ function createLeaderboardRow(participant) {
   return row;
 }
 
+function createChallengeLeaderboardRow(participant) {
+  const row = document.createElement("article");
+  row.className = "leaderboard-row challenge-leaderboard-row";
+
+  const rank = document.createElement("strong");
+  rank.className = "leaderboard-rank";
+  rank.textContent = `#${participant.rank}`;
+
+  const name = document.createElement("div");
+  name.className = "leaderboard-name";
+  const title = document.createElement("h3");
+  title.textContent = participant.displayName;
+  const caption = document.createElement("p");
+  caption.textContent = `${participant.challengeTitle} · ${participant.difficulty}`;
+  name.append(title, caption);
+
+  const accuracy = document.createElement("span");
+  accuracy.innerHTML = "<small>точность</small>";
+  accuracy.append(`${participant.accuracy}%`);
+
+  const duration = document.createElement("span");
+  duration.innerHTML = "<small>время</small>";
+  duration.append(formatTimer(participant.durationSeconds));
+
+  const speed = document.createElement("span");
+  speed.innerHTML = "<small>скорость</small>";
+  speed.append(`${participant.charsPerMinute} зн/мин`);
+
+  const mistakes = document.createElement("span");
+  mistakes.className = "leaderboard-score";
+  mistakes.innerHTML = "<small>ошибок</small>";
+  mistakes.append(String(participant.mistakes));
+
+  row.append(rank, name, accuracy, duration, speed, mistakes);
+  return row;
+}
+
+function updateLeaderboardTabs() {
+  const isLessons = leaderboardMode === "lessons";
+  document.querySelector("#leaderboard-lessons-tab").classList.toggle("active", isLessons);
+  document.querySelector("#leaderboard-lessons-tab").setAttribute("aria-selected", String(isLessons));
+  document.querySelector("#leaderboard-challenges-tab").classList.toggle("active", !isLessons);
+  document.querySelector("#leaderboard-challenges-tab").setAttribute("aria-selected", String(!isLessons));
+  document.querySelector("#challenge-leaderboard-filters").classList.toggle("hidden", isLessons);
+}
+
+function challengeDifficultyOptions() {
+  return ["all", ...new Set(challenges.map((challenge) => challenge.difficulty))];
+}
+
+function filteredLeaderboardChallenges() {
+  return challenges.filter(
+    (challenge) =>
+      selectedChallengeDifficulty === "all" ||
+      challenge.difficulty === selectedChallengeDifficulty,
+  );
+}
+
+function renderChallengeLeaderboardFilters() {
+  const difficultySelect = document.querySelector("#challenge-difficulty-filter");
+  const challengeSelect = document.querySelector("#challenge-text-filter");
+  const difficultyOptions = challengeDifficultyOptions();
+  if (!difficultyOptions.includes(selectedChallengeDifficulty)) selectedChallengeDifficulty = "all";
+
+  difficultySelect.innerHTML = "";
+  difficultyOptions.forEach((difficulty) => {
+    const option = document.createElement("option");
+    option.value = difficulty;
+    option.textContent = difficulty === "all" ? "Все сложности" : difficulty;
+    option.selected = difficulty === selectedChallengeDifficulty;
+    difficultySelect.append(option);
+  });
+
+  const filtered = filteredLeaderboardChallenges();
+  if (!filtered.some((challenge) => challenge.id === selectedLeaderboardChallengeId)) {
+    selectedLeaderboardChallengeId = filtered[0]?.id || "";
+  }
+
+  challengeSelect.innerHTML = "";
+  filtered.forEach((challenge) => {
+    const option = document.createElement("option");
+    option.value = challenge.id;
+    option.textContent = `${challenge.title} · ${challenge.text.length} символов`;
+    option.selected = challenge.id === selectedLeaderboardChallengeId;
+    challengeSelect.append(option);
+  });
+  challengeSelect.disabled = !filtered.length;
+}
+
+function updateLeaderboardHeading() {
+  const title = document.querySelector(".leaderboard-head h2");
+  title.textContent =
+    leaderboardMode === "lessons" ? "Кто тренируется чаще" : "Лучшие результаты челленджей";
+}
+
+async function renderLessonsLeaderboard(list, guest) {
+  const data = await fetchLeaderboard(guest ? 5 : undefined);
+  list.innerHTML = "";
+  if (!data.participants.length) {
+    list.innerHTML =
+      '<p class="leaderboard-empty">Пока рейтинг пуст. Первые участники появятся после занятий из аккаунта.</p>';
+    return;
+  }
+  data.participants.forEach((participant) => {
+    list.append(createLeaderboardRow(participant));
+  });
+}
+
+async function renderChallengeLeaderboard(list, guest) {
+  renderChallengeLeaderboardFilters();
+  if (!selectedLeaderboardChallengeId) {
+    list.innerHTML =
+      '<p class="leaderboard-empty">Сначала загрузим тексты челленджей, а потом покажем результаты.</p>';
+    return;
+  }
+
+  const data = await fetchChallengeLeaderboard(selectedLeaderboardChallengeId, guest ? 5 : undefined);
+  list.innerHTML = "";
+  if (!data.participants.length) {
+    list.innerHTML =
+      '<p class="leaderboard-empty">У этого челленджа пока нет результатов. Самое время стать первым!</p>';
+    return;
+  }
+  data.participants.forEach((participant) => {
+    list.append(createChallengeLeaderboardRow(participant));
+  });
+}
+
 async function renderLeaderboard() {
   const list = document.querySelector("#leaderboard-list");
   const guestPanel = document.querySelector("#leaderboard-guest-panel");
@@ -722,6 +863,8 @@ async function renderLeaderboard() {
   const guest = !isAuthenticated();
   const pendingSessions = loadPendingSessions();
 
+  updateLeaderboardTabs();
+  updateLeaderboardHeading();
   guestPanel.classList.toggle("hidden", !guest);
   if (guest) {
     guestMessage.textContent = pendingSessions.length
@@ -732,16 +875,8 @@ async function renderLeaderboard() {
   list.innerHTML = '<p class="leaderboard-empty">Загружаем рейтинг…</p>';
 
   try {
-    const data = await fetchLeaderboard(guest ? 5 : undefined);
-    list.innerHTML = "";
-    if (!data.participants.length) {
-      list.innerHTML =
-        '<p class="leaderboard-empty">Пока рейтинг пуст. Первые участники появятся после занятий из аккаунта.</p>';
-      return;
-    }
-    data.participants.forEach((participant) => {
-      list.append(createLeaderboardRow(participant));
-    });
+    if (leaderboardMode === "lessons") await renderLessonsLeaderboard(list, guest);
+    else await renderChallengeLeaderboard(list, guest);
   } catch {
     list.innerHTML =
       '<p class="leaderboard-empty error">Не получилось загрузить рейтинг. Попробуй обновить страницу чуть позже.</p>';
@@ -885,6 +1020,23 @@ document.querySelector("#leaderboard-button").addEventListener("click", () => {
   renderLeaderboard();
   showScreen("leaderboard");
 });
+document.querySelector("#leaderboard-lessons-tab").addEventListener("click", () => {
+  leaderboardMode = "lessons";
+  renderLeaderboard();
+});
+document.querySelector("#leaderboard-challenges-tab").addEventListener("click", () => {
+  leaderboardMode = "challenges";
+  renderLeaderboard();
+});
+document.querySelector("#challenge-difficulty-filter").addEventListener("change", (event) => {
+  selectedChallengeDifficulty = event.target.value;
+  selectedLeaderboardChallengeId = "";
+  renderLeaderboard();
+});
+document.querySelector("#challenge-text-filter").addEventListener("change", (event) => {
+  selectedLeaderboardChallengeId = event.target.value;
+  renderLeaderboard();
+});
 document
   .querySelector("#leaderboard-back-button")
   .addEventListener("click", () => showScreen("map"));
@@ -947,6 +1099,9 @@ fetch("/api/challenges")
   .then((data) => {
     challenges = data;
     if (!screens.challenge.classList.contains("hidden")) renderChallenges();
+    if (!screens.leaderboard.classList.contains("hidden") && leaderboardMode === "challenges") {
+      renderLeaderboard();
+    }
   })
   .catch(() => {
     document.querySelector("#challenge-list").innerHTML =
